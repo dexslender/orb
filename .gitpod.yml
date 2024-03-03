@@ -1,0 +1,5 @@
+image: gitpod/workspace-go:latest
+
+vscode:
+  extensions:
+    - golang.go
