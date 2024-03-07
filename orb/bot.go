@@ -17,7 +17,7 @@ import (
 
 func New(l *log.Logger, c util.Config) *Orb {
 	return &Orb{
-		Logger: l,
+		Log:    l,
 		Config: c,
 	}
 }
@@ -25,14 +25,14 @@ func New(l *log.Logger, c util.Config) *Orb {
 type Orb struct {
 	bot.Client
 	Config    util.Config
-	Logger    *log.Logger
+	Log       *log.Logger
 	UPresence *util.PresenceUpdater
 }
 
 func (o *Orb) Setup() {
 	var err error
 
-	o.UPresence = util.NewPresenceUpdater(o.Logger, o.Config)
+	o.UPresence = util.NewPresenceUpdater(o.Log, o.Config)
 
 	o.Client, err = disgo.New(o.Config.Bot.Token,
 		bot.WithGatewayConfigOpts(
@@ -46,11 +46,11 @@ func (o *Orb) Setup() {
 				gateway.IntentsNonPrivileged,
 			),
 		),
-		bot.WithLogger(slog.New(o.Logger)),
+		bot.WithLogger(slog.New(o.Log)),
 		bot.WithEventListeners(listeners(o)),
 	)
 	if err != nil {
-		o.Logger.Fatal("failed to create client", "err", err)
+		o.Log.Fatal("failed to create client", "err", err)
 	}
 }
 
@@ -60,11 +60,11 @@ func (o *Orb) StartNLock() {
 
 	defer func() {
 		o.Close(ctx)
-		o.Logger.Info("client closed, turning off\n\t(please wait)")
+		o.Log.Info("client closed, turning off\n\t(please wait)")
 	}()
 
 	if err := o.OpenGateway(ctx); err != nil {
-		o.Logger.Fatal("Gateway open error: ", err)
+		o.Log.Fatal("Gateway open error: ", err)
 	}
 
 	k := make(chan os.Signal, 1)
