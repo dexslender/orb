@@ -1,0 +1,14 @@
+bot:
+  # token:
+  # client_secret:
+  # guildId:
+  setupCommands: false
+  globalCommands: false
+  mobileOs: true
+  debugLog: false
+
+presenceUpdater:
+  enabled: false
+  delay: 10s
+  presences:
+    - state: hello!
