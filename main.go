@@ -23,12 +23,13 @@ func main() {
 		logger.Fatal("when loading config", "err", err)
 	}
 
-	log.SetLevel(log.Level(config.Bot.LogLevel))
+	logger.SetLevel(log.Level(config.Bot.LogLevel))
+	logger.Debug("config loaded")
 
 	// -----bot
 	bot := orb.New(logger, &config)
-
-	bot.SetCommandManager(&util.Cmanager{Logger: logger})
+	bot.SetActivityManager(&util.Amanager{Logger: logger, Config: bot.Config})
+	bot.SetCommandManager(&util.Cmanager{Logger: logger, Config: bot.Config})
 	bot.AddCommands(commands.Commands...)
 	bot.Setup()
 }

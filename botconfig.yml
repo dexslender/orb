@@ -4,3 +4,18 @@ bot:
   setupCommands: false
   globalCommands: false
   logLevel: 0 # dbg:-4 info:0 warn:4 err:8 fatal:12
+  
+activityManager:
+  enabled: true
+  onlineMobil: true
+  interval: 10s
+  activities:
+    - state: 👋 hello world
+      status: idle
+    - state: just type /
+      status: online
+    - state: working on it...
+      status: dnd
+    - type: listening
+      name: discord gateway 🔥
+      status: dnd

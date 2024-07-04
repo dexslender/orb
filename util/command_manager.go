@@ -15,6 +15,7 @@ var _ CommandManager = (*Cmanager)(nil)
 
 type Cmanager struct {
 	Logger *log.Logger
+	Config *Config
 }
 
 func (m *Cmanager) OnInteraction(data *events.InteractionCreate) {
