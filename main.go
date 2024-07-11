@@ -29,7 +29,7 @@ func main() {
 	// -----bot
 	bot := orb.New(logger, &config)
 	bot.SetActivityManager(&util.Amanager{Logger: logger, Config: bot.Config})
-	bot.SetCommandManager(&util.Cmanager{Logger: logger, Config: bot.Config})
+	bot.SetCommandManager(&util.Imanager{Logger: logger, Config: bot.Config})
 	bot.AddCommands(commands.Commands...)
 	bot.Setup()
 }

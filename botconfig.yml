@@ -1,7 +1,7 @@
 bot:
   token: # on env 
-  guildId: 0
-  setupCommands: false
+  guildId: 880212496470908988
+  setupCommands: true
   globalCommands: false
   logLevel: 0 # dbg:-4 info:0 warn:4 err:8 fatal:12
   
@@ -12,7 +12,7 @@ activityManager:
   activities:
     - state: 👋 hello world
       status: idle
-    - state: just type /
+    - state: just type "/"
       status: online
     - state: working on it...
       status: dnd

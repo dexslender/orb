@@ -24,7 +24,7 @@ func New(logger *log.Logger, config *util.Config) *Orb {
 
 type Orb struct {
 	bot.Client
-	util.CommandManager
+	util.InteractionManager
 	util.ActivityManager
 	Config *util.Config
 	Log    *log.Logger
@@ -52,11 +52,12 @@ func (o *Orb) Setup() {
 	if err != nil {
 		o.Log.Fatal("client error", "err", err)
 	}
+	o.SetupCommands(o)
 	o.StartNLock()
 }
 
-func (o *Orb) SetCommandManager(m util.CommandManager) {
-	o.CommandManager = m
+func (o *Orb) SetCommandManager(m util.InteractionManager) {
+	o.InteractionManager = m
 }
 
 func (o *Orb) SetActivityManager(m util.ActivityManager) {

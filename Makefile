@@ -1,4 +1,4 @@
-OUT = "bin/orb"
+OUT = "bin/orb.bot"
 
 all: build
 build:
