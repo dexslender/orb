@@ -1,6 +1,6 @@
 bot:
   token: # on env 
-  guildId: 880212496470908988
+  guildId: # on env
   setupCommands: true
   globalCommands: false
   logLevel: 0 # dbg:-4 info:0 warn:4 err:8 fatal:12
