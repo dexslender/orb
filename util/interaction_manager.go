@@ -2,16 +2,11 @@ package util
 
 import (
 	"github.com/charmbracelet/log"
+	"github.com/dexslender/orb/orb"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 )
-
-type InteractionManager interface {
-	OnInteraction(data *events.InteractionCreate)
-	AddCommands(...Command)
-	SetupCommands(bot.Client)
-}
 
 type InteractionRegister interface {
 	// Add Command handler to Manager
@@ -22,12 +17,10 @@ type InteractionRegister interface {
 	// TODO: Add specific as Button()
 }
 
-var _ InteractionManager = (*Imanager)(nil)
-var _ InteractionRegister = (*Imanager)(nil)
-
 type Imanager struct {
+	*orb.Orb
 	Logger        *log.Logger
-	Config        *Config
+	Config        *orb.Config
 	interactions  []Command
 	components    []Component
 	autocompletes []Autocomplete
@@ -40,6 +33,7 @@ func (m *Imanager) OnInteraction(data *events.InteractionCreate) {
 		for _, cmd := range m.interactions {
 			if cmd.CommandName() == i.Data.CommandName() {
 				ctx := &CommandContext{
+					m.Orb,
 					events.ApplicationCommandInteractionCreate{
 						GenericEvent:                  data.GenericEvent,
 						Respond:                       data.Respond,

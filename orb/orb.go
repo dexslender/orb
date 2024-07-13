@@ -9,25 +9,26 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/gateway"
 )
 
-func New(logger *log.Logger, config *util.Config) *Orb {
+func New(ver string, logger *log.Logger, config *Config) *Orb {
 	return &Orb{
-		Config: config,
-		Log:    logger,
+		Config:  config,
+		Log:     logger,
+		Version: ver,
 	}
 }
 
 type Orb struct {
 	bot.Client
-	util.InteractionManager
-	util.ActivityManager
-	Config *util.Config
-	Log    *log.Logger
+	InteractionManager
+	ActivityManager
+	Config  *Config
+	Log     *log.Logger
+	Version string
 }
 
 func (o *Orb) Setup() {
@@ -56,11 +57,11 @@ func (o *Orb) Setup() {
 	o.StartNLock()
 }
 
-func (o *Orb) SetCommandManager(m util.InteractionManager) {
+func (o *Orb) SetCommandManager(m InteractionManager) {
 	o.InteractionManager = m
 }
 
-func (o *Orb) SetActivityManager(m util.ActivityManager) {
+func (o *Orb) SetActivityManager(m ActivityManager) {
 	o.ActivityManager = m
 }
 

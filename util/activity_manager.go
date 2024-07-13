@@ -6,21 +6,15 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
+	"github.com/dexslender/orb/orb"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/gateway"
 )
 
-type ActivityManager interface {
-	SetupActivity(*gateway.Config)
-	StartActivityUpdater(bot.Client)
-}
-
-var _ ActivityManager = (*Amanager)(nil)
-
 type Amanager struct {
 	Logger  *log.Logger
-	Config  *Config
+	Config  *orb.Config
 	current int
 }
 
@@ -53,7 +47,7 @@ func (a *Amanager) StartActivityUpdater(c bot.Client) {
 	}
 }
 
-func (a *Amanager) resolveActivity(act Activity) *gateway.MessageDataPresenceUpdate {
+func (a *Amanager) resolveActivity(act orb.Activity) *gateway.MessageDataPresenceUpdate {
 	var (
 		status   discord.OnlineStatus
 		activity discord.Activity

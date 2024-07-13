@@ -2,6 +2,7 @@ package util
 
 import (
 	"github.com/charmbracelet/log"
+	"github.com/dexslender/orb/orb"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/rest"
@@ -16,6 +17,7 @@ type Command interface {
 }
 
 type CommandContext struct {
+	Orb *orb.Orb
 	events.ApplicationCommandInteractionCreate
 	Logger *log.Logger
 }

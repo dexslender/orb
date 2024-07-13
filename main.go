@@ -10,11 +10,13 @@ import (
 	"github.com/kkyr/fig"
 )
 
+var version string = "unknown"
+
 func main() {
 	// -----logger
 	logger := log.NewWithOptions(os.Stderr, log.Options{ReportTimestamp: true})
 	// -----config
-	var config util.Config
+	var config orb.Config
 	err := fig.Load(&config,
 		fig.File("botconfig.yml"),
 		fig.UseEnv("ORB"),
@@ -27,9 +29,10 @@ func main() {
 	logger.Debug("config loaded")
 
 	// -----bot
-	bot := orb.New(logger, &config)
+	bot := orb.New(version, logger, &config)
 	bot.SetActivityManager(&util.Amanager{Logger: logger, Config: bot.Config})
-	bot.SetCommandManager(&util.Imanager{Logger: logger, Config: bot.Config})
-	bot.AddCommands(commands.Commands...)
+	manager := &util.Imanager{Logger: logger, Config: bot.Config, Orb: bot}
+	manager.AddCommands(commands.Commands...)
+	bot.SetCommandManager(manager)
 	bot.Setup()
 }

@@ -7,7 +7,10 @@ import (
 )
 
 var Commands = []util.Command{
-	&Ping{},
+	new(Ping),
+	new(Purge),
+	new(Setup),
+	new(Info),
 }
 
 type base struct {
@@ -17,7 +20,7 @@ type base struct {
 func (c *base) Run(*util.CommandContext) error { return errors.New("missing run function :(") }
 
 func (c *base) Error(cctx *util.CommandContext, err error) {
-	cctx.Logger.Error("command malfunction",
+	cctx.Logger.Error("command returned error",
 		"command", cctx.Data.CommandName(),
 		"error", err,
 	)

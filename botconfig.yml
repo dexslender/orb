@@ -19,3 +19,5 @@ activityManager:
     - type: listening
       name: discord gateway 🔥
       status: dnd
+    - state: "dev mode: on"
+      status: idle
