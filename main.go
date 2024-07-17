@@ -10,7 +10,7 @@ import (
 	"github.com/kkyr/fig"
 )
 
-var version string = "unknown"
+var version string = "dev"
 
 func main() {
 	// -----logger

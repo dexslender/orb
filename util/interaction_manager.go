@@ -96,7 +96,7 @@ func (m *Imanager) SetupCommands(c bot.Client) {
 			if err != nil {
 				m.Logger.Error("command setup fail", "err", err)
 			} else {
-				m.Logger.Info("command setup", "total", len(ok), "guild", m.Config.Bot.GuildID, "global", m.Config.Bot.SetupCommands)
+				m.Logger.Info("command setup", "total", len(ok), "guild", m.Config.Bot.GuildID, "global", m.Config.Bot.GlobalCommands)
 			}
 		}
 	}

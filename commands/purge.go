@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/dexslender/orb/util"
@@ -56,10 +57,29 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 		)
 		return err
 	}
-	var toDel []snowflake.ID
+	var (
+		toDel []snowflake.ID
+		no    int
+		other string
+	)
+	days := 14 * 24 * time.Hour
 	for _, msg := range msgs {
+		if msg.CreatedAt.Before(time.Now().Add(-days)) {
+			no += 1
+			continue
+		}
 		toDel = append(toDel, msg.ID)
 	}
+	if no > 0 {
+		other = fmt.Sprintf("\nskiped %d messages very old", no)
+	}
+	if len(toDel) <= 0 {
+		_, err := cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+			SetContentf("Nothing to do :(%s", other).
+			Build())
+		return err
+	}
+
 	cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 		SetContentf("Deleting %d messages...", len(toDel)).
 		Build(),
@@ -78,8 +98,9 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 
 	autodelete := time.Second * 10
 	_, err = cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-		SetContentf("Deleted %d messages...\nAutodelete %s",
+		SetContentf("Deleted %d messages...%s\nAutodelete %s",
 			len(toDel),
+			other,
 			discord.NewTimestamp(
 				discord.TimestampStyleRelative,
 				time.Now().Add(autodelete))).

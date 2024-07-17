@@ -13,19 +13,3 @@ func listeners(o *Orb) *events.ListenerAdapter {
 		},
 	}
 }
-
-/*
-	gs, err := o.Rest().GetCurrentUserGuilds(
-		"",
-		0,
-		0,
-		100,
-		true,
-	)
-	if err != nil {
-		o.Log.Error("fetch guilds failed", "err", err)
-	} else {
-		o.Log.Info("guild cound", "len", len(gs))
-	}
-
-*/

@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
+	"github.com/disgoorg/disgo/cache"
 	"github.com/disgoorg/disgo/gateway"
 )
 
@@ -49,6 +50,9 @@ func (o *Orb) Setup() {
 		),
 		bot.WithLogger(slog.New(o.Log)),
 		bot.WithEventListeners(listeners(o)),
+		bot.WithCacheConfigOpts(
+			cache.WithCaches(cache.FlagGuilds|cache.FlagMembers),
+		),
 	)
 	if err != nil {
 		o.Log.Fatal("client error", "err", err)
