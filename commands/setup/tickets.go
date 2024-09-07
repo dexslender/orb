@@ -3,12 +3,11 @@ package setup
 import (
 	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/webhook"
 )
 
-var TicketsCmd = discord.ApplicationCommandOptionSubCommand{
+var TicketsCommand = discord.ApplicationCommandOptionSubCommand{
 	Name:        "tickets",
-	Description: "just setup/configure ticket system",
+	Description: "just setup/configure ticket system (/info about:tickets)",
 	Options: []discord.ApplicationCommandOption{
 		discord.ApplicationCommandOptionChannel{
 			Name:         "channel",
@@ -27,20 +26,40 @@ var TicketsCmd = discord.ApplicationCommandOptionSubCommand{
 			Required:    false,
 		},
 		// discord.ApplicationCommandOptionString{      // NOTE: Buttons aren't supported on custom webhooks :(
-		// 	Name:        "webhook-url",                 // NOTE: Maybe creating identical webhook but by the client
-		// 	Description: "custom webhook access url",
+		// 	Name:        "webhook",                 // NOTE: Maybe creating identical webhook but by the client
+		// 	Description: "custom webhook",
 		// 	Required:    false,
 		// },
 	},
 }
 
+var ticketChannelDefaultConfig discord.GuildChannelCreate = discord.GuildTextChannelCreate{
+	Name: "tickets",
+	Topic: "Create a new ticket. Contact server mods and support team from here!",
+	// PermissionOverwrites: [], // TODO: needed to prevent messages from unauthorized users
+}
+
 func RunTickets(cctx *util.CommandContext) error {
 	err := cctx.DeferCreateMessage(false)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
+	var action int
+	if _, ok := cctx.SlashCommandInteractionData().OptChannel("channel"); ok { action = 2 } else 
+	if _, ok := cctx.SlashCommandInteractionData().OptString("webhook"); ok { action = 3 } else 
+	{ action = 1 }
+	return HandleAction(cctx, action)
+}
 
-	if channel, ok := cctx.SlashCommandInteractionData().OptChannel("channel"); ok {
+func HandleAction(cctx *util.CommandContext, action int) error {
+	return nil
+}
+
+func OnClickTicket(cctx *util.ComponentContext) error {
+	cctx.Logger.Info("received interaction request from ticket button")
+	return nil
+}
+
+/*
+if channel, ok := cctx.SlashCommandInteractionData().OptChannel("channel"); ok {
 		err := cctx.Client().Rest().SendTyping(channel.ID)
 		if err != nil {
 			_, err := cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
@@ -97,12 +116,6 @@ func RunTickets(cctx *util.CommandContext) error {
 			Build())
 		return err
 	} else {
-		// TODO: here create a new channel :)
 		return nil
 	}
-}
-
-func OnClickTicket(cctx *util.ComponentContext) error {
-	cctx.Logger.Info("received interaction request from ticket button")
-	return nil
-}
+*/

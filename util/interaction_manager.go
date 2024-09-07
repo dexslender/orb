@@ -8,43 +8,53 @@ import (
 	"github.com/disgoorg/disgo/events"
 )
 
-type InteractionRegister interface {
-	// Add Command handler to Manager
-	Command(Command)
-	Component(string, ComponentHandle)
-	Autocomplete(string, AutocompleteHandle)
-	Modal(string, ModalHandle)
-	// TODO: Add specific as Button()
-}
-
 type Imanager struct {
 	*orb.Orb
 	Logger        *log.Logger
 	Config        *orb.Config
-	interactions  []Command
-	components    []Component
+	tasks         []Task
 	autocompletes []Autocomplete
+	components    []Component
+	interactions  []Command
 	modals        []Modal
 }
 
 func (m *Imanager) OnInteraction(data *events.InteractionCreate) {
+	m.Logger.Info("", "tasks", len(m.tasks))
+	for i, v := range m.tasks {
+		v.OnInteraction(data)
+		if v.Deleteable() {
+			m.tasks[i] = m.tasks[len(m.tasks)-1]
+			m.tasks[len(m.tasks)-1] = nil
+			m.tasks = m.tasks[:len(m.tasks)-1]
+		}
+	}
 	switch i := data.Interaction.(type) {
 	case discord.ApplicationCommandInteraction:
 		for _, cmd := range m.interactions {
 			if cmd.CommandName() == i.Data.CommandName() {
-				ctx := &CommandContext{
-					m.Orb,
-					events.ApplicationCommandInteractionCreate{
-						GenericEvent:                  data.GenericEvent,
-						Respond:                       data.Respond,
-						ApplicationCommandInteraction: i,
-					},
-					m.Logger,
+				executor := func(
+					man *Imanager,
+					data *events.InteractionCreate,
+					i discord.ApplicationCommandInteraction,
+					com Command,
+				) {
+					ctx := &CommandContext{
+						man.Orb,
+						events.ApplicationCommandInteractionCreate{
+							GenericEvent:                  data.GenericEvent,
+							Respond:                       data.Respond,
+							ApplicationCommandInteraction: i,
+						},
+						man.Logger,
+						func(t Task) { man.addTask(t) },
+					}
+					err := com.Run(ctx)
+					if err != nil {
+						com.Error(ctx, err)
+					}
 				}
-				err := cmd.Run(ctx)
-				if err != nil {
-					cmd.Error(ctx, err)
-				}
+				go executor(m, data, i, cmd)
 			}
 		}
 	case discord.ComponentInteraction:
@@ -64,9 +74,34 @@ func (m *Imanager) OnInteraction(data *events.InteractionCreate) {
 				}
 			}
 		}
+	case discord.AutocompleteInteraction:
+		for _, ac := range m.autocompletes {
+			if ac.Command.CommandName() == i.Data.CommandName {
+				executor := func(
+					data *events.InteractionCreate,
+					i discord.AutocompleteInteraction,
+					m *Imanager,
+					ac Autocomplete,
+				) {
+					ctx := &AutocompleteContext{
+						events.AutocompleteInteractionCreate{GenericEvent: data.GenericEvent, AutocompleteInteraction: i, Respond: data.Respond},
+						m.Logger,
+					}
+					data.Respond(
+						discord.InteractionResponseTypeAutocompleteResult,
+						discord.AutocompleteResult{Choices: ac.Run(ctx)},
+					)
+				}
+				go executor(data, i, m, ac)
+			}
+		}
 	default:
 		m.Logger.Warn("unhandled interaction", "type", i.Type())
 	}
+}
+
+func (m *Imanager) addTask(t Task) {
+	m.tasks = append(m.tasks, t)
 }
 
 func (m *Imanager) SetupCommands(c bot.Client) {
@@ -115,31 +150,4 @@ func (m *Imanager) GetCommand(query string) Command {
 		}
 	}
 	return nil
-}
-
-// Add Command handler to Manager
-func (m *Imanager) Command(cmd Command) {
-	defer func() {
-		if err := recover(); err != nil {
-			m.Logger.Error("command failed to Init()", "command", cmd, "err", err)
-		} else {
-			m.interactions = append(m.interactions, cmd)
-		}
-
-	}()
-	cmd.Init(m)
-}
-
-func (m *Imanager) Component(customId string, handle ComponentHandle) {
-	if customId != "" {
-		m.components = append(m.components, Component{customId, handle})
-	}
-}
-
-func (m *Imanager) Autocomplete(_ string, _ AutocompleteHandle) {
-	panic("not implemented") // TODO: Implement
-}
-
-func (m *Imanager) Modal(_ string, _ ModalHandle) {
-	panic("not implemented") // TODO: Implement
 }

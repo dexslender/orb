@@ -32,7 +32,10 @@ func (c *Ping) Run(cctx *util.CommandContext) error {
 	refresh := discord.NewSecondaryButton("Refresh", "refresh-ping")
 
 	_, err = cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-		SetContentf("```yaml\nRest:    %s\nGateway: %s```", rest, GW).
+		SetContentf("```yaml\n%s```", FormatSpacing(
+			"Rest", rest,
+			"Gateway", GW,
+		)).
 		AddActionRow(refresh).
 		Build(),
 	)
@@ -51,7 +54,10 @@ func refresh(cctx *util.ComponentContext) error {
 		cctx.Message.ChannelID,
 		cctx.Message.ID,
 		discord.NewMessageUpdateBuilder().
-			SetContentf("```yaml\nRest:    %s\nGateway: %s```", rest, GW).
+			SetContentf("```yaml\n%s```", FormatSpacing(
+				"Rest", rest,
+				"Gateway", GW,
+			)).
 			Build(),
 	)
 	return err

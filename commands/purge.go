@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -30,87 +31,139 @@ func (c *Purge) Init(util.InteractionRegister) {
 	}
 }
 
+const (
+	autodelete = time.Second * 10
+	limit      = 14 * 24 * time.Hour
+)
+
 func (c *Purge) Run(cctx *util.CommandContext) error {
 	amount := cctx.SlashCommandInteractionData().Int("amount")
 	err := cctx.DeferCreateMessage(false)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
+
 	msg, err := cctx.GetInteractionResponse()
-	if err != nil {
-		return err
-	}
-	msgs, err := cctx.Client().Rest().GetMessages(
-		cctx.Channel().ID(),
-		0,
-		msg.ID,
-		0,
-		amount,
-	)
-	if err != nil {
-		return err
-	}
-	if len(msgs) <= 1 {
-		_, err = cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-			SetContentf("Only 1 message detected :(\n||U can delete it :)||").
-			Build(),
-		)
-		return err
-	}
+	if err != nil { return err }
+
+	msgs, err := cctx.Client().Rest().
+		GetMessages(cctx.Channel().ID(), 0, msg.ID, 0, amount)
+	if err != nil { return err }
+
 	var (
-		toDel []snowflake.ID
-		no    int
-		other string
+		deleting []snowflake.ID
+		old      int
+		errorMsg string
 	)
-	days := 14 * 24 * time.Hour
-	for _, msg := range msgs {
-		if msg.CreatedAt.Before(time.Now().Add(-days)) {
-			no += 1
+
+	for _, m := range msgs {
+		if m.CreatedAt.Before(time.Now().Add(-limit)) {
+			old += 1
 			continue
 		}
-		toDel = append(toDel, msg.ID)
+		deleting = append(deleting, m.ID)
 	}
-	if no > 0 {
-		other = fmt.Sprintf("\nskiped %d messages very old", no)
+
+	if len(deleting) <= 0 {
+		errorMsg = "Nothing to do o.o"
+		if old > 0 {
+			errorMsg += fmt.Sprintf("\nskipped %d messages too old", old)
+		}
+	} else if len(deleting) == 1 {
+		errorMsg = "1 message detected, you can delete it :)"
+		if old > 0 {
+			errorMsg += fmt.Sprintf("\nskipped %d messages too old", old)
+		}
 	}
-	if len(toDel) <= 0 {
+
+	if errorMsg != "" {
+		_, err := cctx.UpdateInteractionResponse(discord.MessageUpdate{
+			Content: &errorMsg,
+		})
+		return err
+	}
+
+	if old > 0 {
 		_, err := cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-			SetContentf("Nothing to do :(%s", other).
+			SetContentf("```go\ndelete %d messages?\nskipped %d too old```", len(deleting), old).
+			AddActionRow(discord.NewPrimaryButton("Yes", "purge-yes"), discord.NewSecondaryButton("No", "purge-no")).
 			Build())
+		if err != nil {
+			return err
+		}
+		action := make(chan util.InteractionPayload[discord.ComponentInteraction], 1)
+		ctx, cl := context.WithTimeout(context.Background(), time.Second*10)
+		cctx.AddTask(util.MakeInteractionTask(
+			ctx,
+			func(ip util.InteractionPayload[discord.ComponentInteraction]) bool {
+				return ip.Interaction.Message.ID == msg.ID
+			},
+			action,
+		))
+
+		select {
+		case p := <-action:
+			cl()
+			err = p.InteractionResponderFunc(discord.InteractionResponseTypeDeferredUpdateMessage, nil)
+			if err != nil { return err }
+			switch p.Interaction.Data.CustomID() {
+			case "purge-yes":
+				cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+					SetContentf("Deleting %d messages...", len(deleting)).
+					ClearContainerComponents().
+					Build())
+				err = cctx.Client().Rest().
+					BulkDeleteMessages(cctx.Channel().ID(), deleting)
+				if err != nil {
+					return err
+				}
+				_, err = cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+					SetContentf(
+						"Deleted %d messages ||destroying %s||",
+						len(deleting),
+						discord.NewTimestamp(
+							discord.TimestampStyleRelative, 
+							time.Now().Add(autodelete),
+						),
+					).
+				Build())
+				go func(cctx *util.CommandContext) {
+					time.Sleep(autodelete)
+					cctx.DeleteInteractionResponse()
+				}(cctx)
+				return err
+			case "purge-no":
+				_, err := cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+					SetContent("Ok, cancelled :)").
+					ClearContainerComponents().
+					Build())
+				return err
+			default: return nil
+			}
+		case <-ctx.Done():
+			_, err := cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+				SetContent("Ok, doing nothing").
+				ClearContainerComponents().
+				Build())
+			return err
+		}
+	} else {
+		cctx.UpdateInteractionResponse(discord.MessageUpdate{
+			Content: json.Ptr(fmt.Sprintf("Deleting %d messages...", len(deleting))),
+		})
+		err = cctx.Client().Rest().
+			BulkDeleteMessages(cctx.Channel().ID(), deleting)
+		if err != nil {
+			return err
+		}
+		_, err = cctx.UpdateInteractionResponse(discord.MessageUpdate{
+			Content: json.Ptr(fmt.Sprintf("Deleted %d messages ||destroying %s||",
+				len(deleting),
+				discord.NewTimestamp(discord.TimestampStyleRelative, time.Now().Add(autodelete))),
+			),
+		})
+		go func(cctx *util.CommandContext) {
+			time.Sleep(autodelete)
+			cctx.DeleteInteractionResponse()
+		}(cctx)
 		return err
 	}
-
-	cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-		SetContentf("Deleting %d messages...", len(toDel)).
-		Build(),
-	)
-	err = cctx.Client().Rest().BulkDeleteMessages(
-		cctx.Channel().ID(),
-		toDel,
-	)
-	if err != nil {
-		_, err := cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-			SetContentf("<:signerror:1071603595067265064> Error\n```go\n%s```", err).
-			Build(),
-		)
-		return err
-	}
-
-	autodelete := time.Second * 10
-	_, err = cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-		SetContentf("Deleted %d messages...%s\nAutodelete %s",
-			len(toDel),
-			other,
-			discord.NewTimestamp(
-				discord.TimestampStyleRelative,
-				time.Now().Add(autodelete))).
-		Build(),
-	)
-	go func(task *util.CommandContext) {
-		// TODO: maybe in local little bit slow to send delete req
-		time.Sleep(autodelete - time.Second)
-		cctx.DeleteInteractionResponse()
-	}(cctx)
-
-	return err
 }

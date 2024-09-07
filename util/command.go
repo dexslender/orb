@@ -20,6 +20,7 @@ type CommandContext struct {
 	Orb *orb.Orb
 	events.ApplicationCommandInteractionCreate
 	Logger *log.Logger
+	AddTask func(Task)
 }
 
 func (e *CommandContext) GetInteractionResponse(opts ...rest.RequestOpt) (*discord.Message, error) {

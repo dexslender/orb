@@ -11,6 +11,7 @@ var Commands = []util.Command{
 	new(Purge),
 	new(Setup),
 	new(Info),
+	new(GD),
 }
 
 type base struct {

@@ -17,14 +17,27 @@ type Info struct {
 	discord.SlashCommandCreate
 }
 
-func (i *Info) Init(util.InteractionRegister) {
+func (i *Info) Init(add util.InteractionRegister) {
 	i.Name = "info"
 	i.Description = "just returns bot's info and states"
-	i.Options = []discord.ApplicationCommandOption{util.HiddenOpt}
+	i.Options = []discord.ApplicationCommandOption{
+		util.HiddenOpt,
+		discord.ApplicationCommandOptionString{
+			Name:         "about",
+			Description:  "Get help about some topic",
+			Required:     false,
+			Autocomplete: true,
+		},
+	}
+
+	add.Autocomplete(i, i.autocomplete)
 }
 
 func (i *Info) Run(ctx *util.CommandContext) error {
 	hidden := ctx.SlashCommandInteractionData().Bool("hidden")
+	if key, ok := ctx.SlashCommandInteractionData().OptString("about"); ok {
+		return HandleAbout(ctx, key)
+	}
 	err := ctx.DeferCreateMessage(hidden)
 	if err != nil {
 		return err
@@ -58,7 +71,6 @@ func (i *Info) Run(ctx *util.CommandContext) error {
 		"Memory", ms.TotalAlloc,
 		"CPU", "\n"+cpu,
 	))
-
 	info := discord.NewEmbedBuilder().
 		SetAuthorName(cu.Tag()).
 		SetAuthorIcon(*cu.AvatarURL()).
@@ -67,6 +79,7 @@ func (i *Info) Run(ctx *util.CommandContext) error {
 			discord.EmbedField{Name: "Stats", Value: usage, Inline: json.Ptr(true)},
 		).
 		SetFooterTextf("Version: %s", ctx.Orb.Version).
+		SetColor(util.HIGHBLUE).
 		Build()
 
 	_, err = ctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
@@ -75,14 +88,48 @@ func (i *Info) Run(ctx *util.CommandContext) error {
 	return err
 }
 
+func (i Info) autocomplete(ac *util.AutocompleteContext) (choices []discord.AutocompleteChoice) {
+	query, ok := ac.Data.OptString("about")
+	if !ok { return nil }
+	for k, a := range abouts {
+		if query != "" {
+			if strings.Contains(a.Name, query) {
+				choices = append(choices, discord.AutocompleteChoiceString{
+					Name:  a.Name,
+					Value: k,
+				})
+			}
+			continue
+		}
+		choices = append(choices, discord.AutocompleteChoiceString{
+			Name:  a.Name,
+			Value: k,
+		})
+	}
+	return
+}
+
+func HandleAbout(ctx *util.CommandContext, key string) error {
+	a := abouts[key]
+	return ctx.CreateMessage(
+		discord.NewMessageCreateBuilder().
+		AddEmbeds(discord.NewEmbedBuilder().
+			SetTitle(a.Name).
+			SetDescription(a.Description).
+			AddFields(a.Details...).
+			SetColor(util.LOWBLUE).
+			Embed).
+		MessageCreate,
+	)
+}
+
 func FormatSpacing(keyvals ...any) (s string) {
 	max := 0
 	for i, v := range keyvals {
-		if i%2 != 0 {
-			continue
-		}
-		if len(v.(string)) > max {
-			max = len(v.(string))
+		if i%2 == 0 {
+			if len(v.(string)) > max {
+				max = len(v.(string))
+			}
 		}
 	}
 	for i, v := range keyvals {
