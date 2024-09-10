@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/dexslender/orb/util"
+	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/json"
 	"github.com/disgoorg/snowflake/v2"
 )
@@ -86,25 +88,22 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 			SetContentf("```go\ndelete %d messages?\nskipped %d too old```", len(deleting), old).
 			AddActionRow(discord.NewPrimaryButton("Yes", "purge-yes"), discord.NewSecondaryButton("No", "purge-no")).
 			Build())
-		if err != nil {
-			return err
-		}
-		action := make(chan util.InteractionPayload[discord.ComponentInteraction], 1)
-		ctx, cl := context.WithTimeout(context.Background(), time.Second*10)
-		cctx.AddTask(util.MakeInteractionTask(
-			ctx,
-			func(ip util.InteractionPayload[discord.ComponentInteraction]) bool {
-				return ip.Interaction.Message.ID == msg.ID
-			},
-			action,
-		))
+		if err != nil { return err }
 
+		action, close := bot.NewEventCollector[*events.ComponentInteractionCreate](
+			cctx.Orb,
+			func(e *events.ComponentInteractionCreate) bool { 
+				return e.Message.ID == msg.ID && e.User().ID == cctx.User().ID
+			 },
+		)
+		defer close()
+		ctx, cl := context.WithTimeout(context.Background(), time.Second*10)
+		defer cl()
 		select {
-		case p := <-action:
-			cl()
-			err = p.InteractionResponderFunc(discord.InteractionResponseTypeDeferredUpdateMessage, nil)
+		case btn := <-action:
+			err := btn.DeferUpdateMessage()
 			if err != nil { return err }
-			switch p.Interaction.Data.CustomID() {
+			switch btn.Data.CustomID() {
 			case "purge-yes":
 				cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 					SetContentf("Deleting %d messages...", len(deleting)).
@@ -120,11 +119,11 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 						"Deleted %d messages ||destroying %s||",
 						len(deleting),
 						discord.NewTimestamp(
-							discord.TimestampStyleRelative, 
+							discord.TimestampStyleRelative,
 							time.Now().Add(autodelete),
 						),
 					).
-				Build())
+					Build())
 				go func(cctx *util.CommandContext) {
 					time.Sleep(autodelete)
 					cctx.DeleteInteractionResponse()

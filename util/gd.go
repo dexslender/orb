@@ -26,6 +26,9 @@ type (
 		Secret string `query:"secret"`
 		Query string `query:"str"`
 	}
+	
+	//---
+	UserData struct {}
 )
 
 func NewEndpoint(method, route string) *Endpoint {

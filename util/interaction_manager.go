@@ -12,7 +12,6 @@ type Imanager struct {
 	*orb.Orb
 	Logger        *log.Logger
 	Config        *orb.Config
-	tasks         []Task
 	autocompletes []Autocomplete
 	components    []Component
 	interactions  []Command
@@ -20,15 +19,6 @@ type Imanager struct {
 }
 
 func (m *Imanager) OnInteraction(data *events.InteractionCreate) {
-	m.Logger.Info("", "tasks", len(m.tasks))
-	for i, v := range m.tasks {
-		v.OnInteraction(data)
-		if v.Deleteable() {
-			m.tasks[i] = m.tasks[len(m.tasks)-1]
-			m.tasks[len(m.tasks)-1] = nil
-			m.tasks = m.tasks[:len(m.tasks)-1]
-		}
-	}
 	switch i := data.Interaction.(type) {
 	case discord.ApplicationCommandInteraction:
 		for _, cmd := range m.interactions {
@@ -47,7 +37,6 @@ func (m *Imanager) OnInteraction(data *events.InteractionCreate) {
 							ApplicationCommandInteraction: i,
 						},
 						man.Logger,
-						func(t Task) { man.addTask(t) },
 					}
 					err := com.Run(ctx)
 					if err != nil {
@@ -98,10 +87,6 @@ func (m *Imanager) OnInteraction(data *events.InteractionCreate) {
 	default:
 		m.Logger.Warn("unhandled interaction", "type", i.Type())
 	}
-}
-
-func (m *Imanager) addTask(t Task) {
-	m.tasks = append(m.tasks, t)
 }
 
 func (m *Imanager) SetupCommands(c bot.Client) {
