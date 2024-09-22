@@ -111,9 +111,7 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 					Build())
 				err = cctx.Client().Rest().
 					BulkDeleteMessages(cctx.Channel().ID(), deleting)
-				if err != nil {
-					return err
-				}
+				if err != nil { return err }
 				_, err = cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 					SetContentf(
 						"Deleted %d messages ||destroying %s||",
@@ -150,9 +148,7 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 		})
 		err = cctx.Client().Rest().
 			BulkDeleteMessages(cctx.Channel().ID(), deleting)
-		if err != nil {
-			return err
-		}
+		if err != nil { return err }
 		_, err = cctx.UpdateInteractionResponse(discord.MessageUpdate{
 			Content: json.Ptr(fmt.Sprintf("Deleted %d messages ||destroying %s||",
 				len(deleting),

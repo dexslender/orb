@@ -36,7 +36,7 @@ func (i *Info) Init(add util.InteractionRegister) {
 func (i *Info) Run(ctx *util.CommandContext) error {
 	hidden := ctx.SlashCommandInteractionData().Bool("hidden")
 	if key, ok := ctx.SlashCommandInteractionData().OptString("about"); ok {
-		return HandleAbout(ctx, key)
+		return HandleAbout(ctx, key, hidden)
 	}
 	err := ctx.DeferCreateMessage(hidden)
 	if err != nil {
@@ -109,7 +109,7 @@ func (i Info) autocomplete(ac *util.AutocompleteContext) (choices []discord.Auto
 	return
 }
 
-func HandleAbout(ctx *util.CommandContext, key string) error {
+func HandleAbout(ctx *util.CommandContext, key string, hidden bool) error {
 	a := abouts[key]
 	return ctx.CreateMessage(
 		discord.NewMessageCreateBuilder().
@@ -119,8 +119,8 @@ func HandleAbout(ctx *util.CommandContext, key string) error {
 			AddFields(a.Details...).
 			SetColor(util.LOWBLUE).
 			Embed).
-		MessageCreate,
-	)
+		SetEphemeral(hidden).
+		MessageCreate)
 }
 
 func FormatSpacing(keyvals ...any) (s string) {

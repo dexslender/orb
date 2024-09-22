@@ -22,7 +22,7 @@ var abouts = map[string]about{
 				Inline: json.Ptr(true),
 			},
 			{
-				Name: "🤖 webhook `unaviable`",
+				Name: "🤖 webhook `unavailable`",
 				Value: "Set a custom webhook, then bot clones it and send a message with button.",
 				Inline: json.Ptr(true),
 			},
