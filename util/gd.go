@@ -18,17 +18,14 @@ const (
 )
 
 type (
-	Endpoint struct { Method, Route string }
-	gdClient struct { http.Client }
+	Endpoint struct{ Method, Route string }
+	gdClient struct{ http.Client }
 
 	//---
-	UsersParams struct { 
+	UsersParams struct {
 		Secret string `query:"secret"`
-		Query string `query:"str"`
+		Query  string `query:"str"`
 	}
-	
-	//---
-	UserData struct {}
 )
 
 func NewEndpoint(method, route string) *Endpoint {
@@ -36,15 +33,18 @@ func NewEndpoint(method, route string) *Endpoint {
 }
 
 var (
-	Users = NewEndpoint(http.MethodPost, "getGJUsers20.php")
-	Scores = NewEndpoint(http.MethodPost, "getGJScores20.php")
+	// DATABASEURL string
+	// SECRETS map[string]string
+	
+	Users    = NewEndpoint(http.MethodPost, "getGJUsers20.php")
+	Scores   = NewEndpoint(http.MethodPost, "getGJScores20.php")
 	UserInfo = NewEndpoint(http.MethodPost, "getGJUserInfo20.php")
 
 	// Levels
 	Dayly = NewEndpoint(http.MethodPost, "getGJDailyLevel.php")
 )
 
-func (gd *gdClient) Request(e *Endpoint, v any) (*http.Response, error)  {
+func (gd *gdClient) Request(e *Endpoint, v any) (*http.Response, error) {
 	req, err := http.NewRequest(
 		e.Method,
 		fmt.Sprintf("%s/%s",
@@ -57,11 +57,9 @@ func (gd *gdClient) Request(e *Endpoint, v any) (*http.Response, error)  {
 	req.Header.Set("User-Agent", "")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	return gd.Do(req)
-	
 }
 
-
-func structToURLValues(item interface{}) url.Values {
+func structToURLValues(item any) url.Values {
 	res := url.Values{}
 	if item == nil {
 		return res

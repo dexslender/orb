@@ -27,8 +27,8 @@ func GetUserRun(ctx* util.CommandContext) error {
 			Secret: util.COMMON_KEY,
 		},
 	)
-	defer res.Body.Close()
 	if err != nil { return err }
+	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
 	if err != nil { return err }
 	return ctx.CreateMessage(discord.NewMessageCreateBuilder().
