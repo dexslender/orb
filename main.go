@@ -20,9 +20,9 @@ func main() {
 	var config orb.Config
 	parser := hclparse.NewParser()
 	f, diags := parser.ParseHCLFile("bot.config")
-	if diags.HasErrors() { log.Fatal("bot.config HCL error: ", diags.Error()) }
-	mdiags := gohcl.DecodeBody(f.Body, orb.HCLctx, &config)
-	if mdiags.HasErrors() { log.Fatal("bot.config HCL error: ", mdiags.Error()) }
+	if diags.HasErrors() { log.Fatal("bot.config HCL parser error: ", diags.Error()) }
+	mdiags := gohcl.DecodeBody(f.Body, orb.HCLctx(logger), &config)
+	if mdiags.HasErrors() { log.Fatal("bot.config HCL decoder error: ", mdiags.Error()) }
 	// -----logger
 	logger.SetLevel(log.Level(config.Bot.LogLevel))
 	logger.Debug("config loaded")

@@ -36,7 +36,8 @@ type (
 	}
 )
 
-var HCLctx = &hcl.EvalContext{
+func HCLctx(l *log.Logger) *hcl.EvalContext {
+	return &hcl.EvalContext{
 		Variables: map[string]cty.Value{
 			//----LogLevels
 			"debug": cty.NumberIntVal(int64(log.DebugLevel)),
@@ -67,7 +68,10 @@ var HCLctx = &hcl.EvalContext{
 				}},
 				Type: function.StaticReturnType(cty.String),
 				Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
-					return cty.StringVal(os.Getenv(args[0].AsString())), nil
+					k := args[0].AsString()
+					v := os.Getenv(k)
+					if v == "" { l.Warn("empty env-var", k, v) }
+					return cty.StringVal(v), nil
 				},
 			}),
 			"duration": function.New(&function.Spec{
@@ -84,4 +88,4 @@ var HCLctx = &hcl.EvalContext{
 			}),
 		},
 	}
-
+}
