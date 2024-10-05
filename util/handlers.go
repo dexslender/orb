@@ -1,8 +1,6 @@
 package util
 
 import (
-	"context"
-
 	"github.com/charmbracelet/log"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
@@ -72,50 +70,3 @@ type ModalContext struct {
 	Logger *log.Logger
 }
 type ModalHandle func(*ModalContext) error
-
-type InteractionPayload[I discord.Interaction] struct {
-	*events.GenericEvent
-	events.InteractionResponderFunc
-	Interaction I
-}
-
-type Task interface {
-	Deleteable() bool
-	OnInteraction(*events.InteractionCreate)
-}
-
-type InteractionTask[I discord.Interaction] struct {
-	filter     func(InteractionPayload[I]) bool
-	c          chan<- InteractionPayload[I]
-	deleteable bool
-}
-
-func (i *InteractionTask[I]) OnInteraction(data *events.InteractionCreate) {
-	if _, ok := data.Interaction.(I); !ok { return }
-	p := InteractionPayload[I]{
-		data.GenericEvent,
-		data.Respond,
-		data.Interaction.(I),
-	}
-	if i.filter(p) {
-		i.c <- p
-	}
-}
-
-func (i InteractionTask[I]) Deleteable() bool {
-	return i.deleteable
-}
-
-func MakeInteractionTask[I discord.Interaction](ctx context.Context, filter func(InteractionPayload[I]) bool, c chan InteractionPayload[I]) *InteractionTask[I] {
-	it := &InteractionTask[I]{
-		filter: filter,
-		c:      c,
-	}
-	go func(ctx context.Context, it *InteractionTask[I]) {
-		if v := ctx.Done(); v != nil {
-			<-v
-			it.deleteable = true
-		}
-	}(ctx, it)
-	return it
-}

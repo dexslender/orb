@@ -7,7 +7,7 @@ import (
 )
 
 type ActivityManager interface {
-	SetupActivity(*gateway.Config)
+	SetupActivity() gateway.ConfigOpt
 	StartActivityUpdater(bot.Client)
 }
 

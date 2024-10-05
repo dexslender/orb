@@ -46,7 +46,7 @@ func (o *Orb) Setup() {
 				gateway.IntentGuilds,
 			),
 			gateway.WithCompress(true),
-			o.SetupActivity,
+			o.SetupActivity(),
 		),
 		bot.WithLogger(slog.New(o.Log)),
 		bot.WithEventListeners(listeners(o)),

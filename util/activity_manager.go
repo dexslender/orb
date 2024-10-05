@@ -18,12 +18,14 @@ type Amanager struct {
 	current int
 }
 
-func (a *Amanager) SetupActivity(c *gateway.Config) {
-	if a.Config.ActivityManager.Enabled && a.size() >= 1 {
-		a.Logger.Debug("configuring presence in gateway", "current", a.current)
-		c.Presence = a.next()
-	} else {
-		a.Logger.Info("activity disabled")
+func (a *Amanager) SetupActivity() gateway.ConfigOpt {
+	return func(c *gateway.Config) {
+		if a.Config.ActivityManager.Enabled && a.size() >= 1 {
+			a.Logger.Debug("configuring presence in gateway", "current", a.current)
+			c.Presence = a.next()
+		} else {
+			a.Logger.Info("activity disabled")
+		}
 	}
 }
 
