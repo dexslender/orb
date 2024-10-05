@@ -1,13 +1,16 @@
-package orb
+// go test -v -run TestDecodeHCL ./_test/
+package test
 
 import (
 	"os"
+	"testing"
 	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/snowflake/v2"
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/gohcl"
+	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
 )
@@ -15,17 +18,17 @@ import (
 type (
 	Config struct {
 		Bot struct {
-			Token          string       `hcl:"token"`
-			GuildID        snowflake.ID `hcl:"guild"`
-			SetupCommands  bool         `hcl:"setup_commands"`
-			GlobalCommands bool         `hcl:"global_commands"`
-			LogLevel       log.Level    `hcl:"log_level"`
+			Token          string    `hcl:"token"`
+			GuildId        int       `hcl:"guild"`
+			SetupCommands  bool      `hcl:"setup_commands"`
+			GlobalCommands bool      `hcl:"global_commands"`
+			LogLevel       log.Level `hcl:"log_level"`
 		} `hcl:"bot,block"`
 		ActivityManager struct {
 			Enabled     bool          `hcl:"enabled"`
 			OnlineMobil bool          `hcl:"online_movil"`
 			Interval    time.Duration `hcl:"interval"`
-			Activities   []Activity    `hcl:"activity,block"`
+			Presences   []Activity    `hcl:"activity,block"`
 		} `hcl:"activity_manager,block"`
 	}
 	Activity struct {
@@ -36,7 +39,11 @@ type (
 	}
 )
 
-var HCLctx = &hcl.EvalContext{
+func TestDecodeHCL(t *testing.T) {
+	parser := hclparse.NewParser()
+	f, diags := parser.ParseHCLFile("bot.hcl")
+	var c Config
+	hclCtx := &hcl.EvalContext{
 		Variables: map[string]cty.Value{
 			//----LogLevels
 			"debug": cty.NumberIntVal(int64(log.DebugLevel)),
@@ -74,7 +81,7 @@ var HCLctx = &hcl.EvalContext{
 				Params: []function.Parameter{{
 					Name: "format", 
 					Type: cty.String, 
-					AllowDynamicType: true,
+					AllowDynamicType: true
 				}},
 				Type:   function.StaticReturnType(cty.Number),
 				Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
@@ -84,4 +91,10 @@ var HCLctx = &hcl.EvalContext{
 			}),
 		},
 	}
-
+	mdiags := gohcl.DecodeBody(f.Body, hclCtx, &c)
+	diags = append(diags, mdiags...)
+	if diags.HasErrors() {
+		t.Fatal("HCL errors: ", diags.Errs())
+	}
+	t.Logf("%+v", c)
+}
