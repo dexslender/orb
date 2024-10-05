@@ -1,7 +1,6 @@
 package util
 
 import (
-	"cmp"
 	"context"
 	"time"
 
@@ -51,47 +50,23 @@ func (a *Amanager) StartActivityUpdater(c bot.Client) {
 
 func (a *Amanager) resolveActivity(act orb.Activity) *gateway.MessageDataPresenceUpdate {
 	var (
-		status   discord.OnlineStatus
 		activity discord.Activity
+		status discord.OnlineStatus
 	)
+	if act.Status == nil { status = discord.OnlineStatusOnline } else 
+	{ status = *act.Status }
+	if act.Type == nil { activity.Type = discord.ActivityTypeGame } else
+	{ activity.Type = *act.Type }
 
-	if act.Name != "" {
-		activity.Name = act.Name
-	} else if act.State != "" {
-		activity.State = &act.State
-		activity.Name = act.State
-	} else {
-		return nil
+	switch *act.Type {
+	case discord.ActivityTypeCustom:
+		activity.Name, activity.State = act.Message, &act.Message
+	case discord.ActivityTypeStreaming:
+		activity.URL = act.URL
+	default:
+		activity.Name = act.Message
 	}
 
-	status = cmp.Or(act.Status, "online")
-
-	activity.Type = func() discord.ActivityType {
-		switch act.Type {
-		case "watching", "watch":
-			return discord.ActivityTypeWatching
-		case "listening", "listen":
-			return discord.ActivityTypeListening
-		case "game", "playing":
-			return discord.ActivityTypeGame
-		case "competing":
-			return discord.ActivityTypeCompeting
-		case "streaming", "stream":
-			return discord.ActivityTypeStreaming
-		case "custom":
-			return discord.ActivityTypeCustom
-		default:
-			if activity.State != nil && activity.Name != "" {
-				return discord.ActivityTypeCustom
-			} else {
-				return discord.ActivityTypeGame
-			}
-		}
-	}()
-
-	if activity.Type == discord.ActivityTypeStreaming && act.URL != "" {
-		activity.URL = &act.URL
-	}
 	return &gateway.MessageDataPresenceUpdate{
 		Status:     status,
 		Activities: []discord.Activity{activity},

@@ -7,7 +7,8 @@ import (
 	"github.com/dexslender/orb/commands"
 	"github.com/dexslender/orb/orb"
 	"github.com/dexslender/orb/util"
-	"github.com/kkyr/fig"
+	"github.com/hashicorp/hcl/v2/gohcl"
+	"github.com/hashicorp/hcl/v2/hclparse"
 )
 
 var version string = "dev"
@@ -17,17 +18,14 @@ func main() {
 	logger := log.NewWithOptions(os.Stderr, log.Options{ReportTimestamp: true})
 	// -----config
 	var config orb.Config
-	err := fig.Load(&config,
-		fig.File("botconfig.yml"),
-		fig.UseEnv("ORB"),
-	)
-	if err != nil {
-		logger.Fatal("when loading config", "err", err)
-	}
-
+	parser := hclparse.NewParser()
+	f, diags := parser.ParseHCLFile("bot.config")
+	if diags.HasErrors() { log.Fatal("bot.config HCL error: ", diags.Error()) }
+	mdiags := gohcl.DecodeBody(f.Body, orb.HCLctx, &config)
+	if mdiags.HasErrors() { log.Fatal("bot.config HCL error: ", mdiags.Error()) }
+	// -----logger
 	logger.SetLevel(log.Level(config.Bot.LogLevel))
 	logger.Debug("config loaded")
-
 	// -----bot
 	bot := orb.New(version, logger, &config)
 	bot.SetActivityManager(&util.Amanager{Logger: logger, Config: bot.Config})
