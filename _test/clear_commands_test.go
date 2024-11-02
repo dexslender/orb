@@ -6,18 +6,10 @@ import (
 	"github.com/dexslender/orb/orb"
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/kkyr/fig"
 )
 
 func TestClearCommands(t *testing.T) {
 	var config orb.Config
-	err := fig.Load(&config,
-		fig.File("botconfig.yml"),
-		fig.UseEnv("ORB"),
-	)
-	if err != nil {
-		t.Fatal("config error: ", err)
-	}
 
 	client, err := disgo.New(config.Bot.Token)
 	if err != nil {
@@ -32,13 +24,6 @@ func TestClearCommands(t *testing.T) {
 
 func TestClearGlobal(t *testing.T) {
 	var config orb.Config
-	err := fig.Load(&config,
-		fig.File("botconfig.yml"),
-		fig.UseEnv("ORB"),
-	)
-	if err != nil {
-		t.Fatal("config error: ", err)
-	}
 
 	client, err := disgo.New(config.Bot.Token)
 	if err != nil {

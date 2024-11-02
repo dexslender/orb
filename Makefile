@@ -1,4 +1,4 @@
-OUT := "bin/orb.bot"
+OUT := ".bin/orb.bot"
 VERSION := $(shell git rev-parse --short HEAD)
 FLAGS := -ldflags="-X 'main.version=${VERSION}'-w -s"
 

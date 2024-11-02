@@ -39,59 +39,60 @@ type (
 	}
 )
 
+var HCLctx = &hcl.EvalContext{
+	Variables: map[string]cty.Value{
+		//----LogLevels
+		"debug": cty.NumberIntVal(int64(log.DebugLevel)),
+		"info":  cty.NumberIntVal(int64(log.InfoLevel)),
+		"warn":  cty.NumberIntVal(int64(log.WarnLevel)),
+		"error": cty.NumberIntVal(int64(log.ErrorLevel)),
+		"fatal": cty.NumberIntVal(int64(log.FatalLevel)),
+		//----Activity Type
+		"playing":   cty.NumberIntVal(int64(discord.ActivityTypeGame)),
+		"streaming": cty.NumberIntVal(int64(discord.ActivityTypeStreaming)),
+		"listening": cty.NumberIntVal(int64(discord.ActivityTypeListening)),
+		"watching":  cty.NumberIntVal(int64(discord.ActivityTypeWatching)),
+		"custom":    cty.NumberIntVal(int64(discord.ActivityTypeCustom)),
+		"competing": cty.NumberIntVal(int64(discord.ActivityTypeCompeting)),
+		//----Statuses
+		"online":    cty.StringVal(string(discord.OnlineStatusOnline)),
+		"dnd":       cty.StringVal(string(discord.OnlineStatusDND)),
+		"idle":      cty.StringVal(string(discord.OnlineStatusIdle)),
+		"invisible": cty.StringVal(string(discord.OnlineStatusInvisible)),
+		"offline":   cty.StringVal(string(discord.OnlineStatusOffline)),
+	},
+	Functions: map[string]function.Function{
+		"env": function.New(&function.Spec{
+			Params: []function.Parameter{{
+				Name:             "key",
+				Type:             cty.String,
+				AllowDynamicType: true,
+			}},
+			Type: function.StaticReturnType(cty.String),
+			Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
+				return cty.StringVal(os.Getenv(args[0].AsString())), nil
+			},
+		}),
+		"duration": function.New(&function.Spec{
+			Params: []function.Parameter{{
+				Name:             "format",
+				Type:             cty.String,
+				AllowDynamicType: true,
+			}},
+			Type: function.StaticReturnType(cty.Number),
+			Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
+				out, err := time.ParseDuration(args[0].AsString())
+				return cty.NumberIntVal(int64(out)), err
+			},
+		}),
+	},
+}
+
 func TestDecodeHCL(t *testing.T) {
 	parser := hclparse.NewParser()
 	f, diags := parser.ParseHCLFile("bot.hcl")
 	var c Config
-	hclCtx := &hcl.EvalContext{
-		Variables: map[string]cty.Value{
-			//----LogLevels
-			"debug": cty.NumberIntVal(int64(log.DebugLevel)),
-			"info":  cty.NumberIntVal(int64(log.InfoLevel)),
-			"warn":  cty.NumberIntVal(int64(log.WarnLevel)),
-			"error": cty.NumberIntVal(int64(log.ErrorLevel)),
-			"fatal": cty.NumberIntVal(int64(log.FatalLevel)),
-			//----Activity Type
-			"playing":   cty.NumberIntVal(int64(discord.ActivityTypeGame)),
-			"streaming": cty.NumberIntVal(int64(discord.ActivityTypeStreaming)),
-			"listening": cty.NumberIntVal(int64(discord.ActivityTypeListening)),
-			"watching":  cty.NumberIntVal(int64(discord.ActivityTypeWatching)),
-			"custom":    cty.NumberIntVal(int64(discord.ActivityTypeCustom)),
-			"competing": cty.NumberIntVal(int64(discord.ActivityTypeCompeting)),
-			//----Statuses
-			"online":    cty.StringVal(string(discord.OnlineStatusOnline)),
-			"dnd":       cty.StringVal(string(discord.OnlineStatusDND)),
-			"idle":      cty.StringVal(string(discord.OnlineStatusIdle)),
-			"invisible": cty.StringVal(string(discord.OnlineStatusInvisible)),
-			"offline":   cty.StringVal(string(discord.OnlineStatusOffline)),
-		},
-		Functions: map[string]function.Function{
-			"env": function.New(&function.Spec{
-				Params: []function.Parameter{{
-					Name:             "key",
-					Type:             cty.String,
-					AllowDynamicType: true,
-				}},
-				Type: function.StaticReturnType(cty.String),
-				Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
-					return cty.StringVal(os.Getenv(args[0].AsString())), nil
-				},
-			}),
-			"duration": function.New(&function.Spec{
-				Params: []function.Parameter{{
-					Name: "format", 
-					Type: cty.String, 
-					AllowDynamicType: true
-				}},
-				Type:   function.StaticReturnType(cty.Number),
-				Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
-					out, err := time.ParseDuration(args[0].AsString())
-					return cty.NumberIntVal(int64(out)), err
-				},
-			}),
-		},
-	}
-	mdiags := gohcl.DecodeBody(f.Body, hclCtx, &c)
+	mdiags := gohcl.DecodeBody(f.Body, HCLctx, &c)
 	diags = append(diags, mdiags...)
 	if diags.HasErrors() {
 		t.Fatal("HCL errors: ", diags.Errs())

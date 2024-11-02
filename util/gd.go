@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -26,6 +27,10 @@ type (
 		Secret string `query:"secret"`
 		Query  string `query:"str"`
 	}
+	UserInfoParams struct {
+		Secret      string `query:"secret"`
+		TargetAccID string `query:"targetAccountID"`
+	}
 )
 
 func NewEndpoint(method, route string) *Endpoint {
@@ -35,7 +40,7 @@ func NewEndpoint(method, route string) *Endpoint {
 var (
 	// DATABASEURL string
 	// SECRETS map[string]string
-	
+
 	Users    = NewEndpoint(http.MethodPost, "getGJUsers20.php")
 	Scores   = NewEndpoint(http.MethodPost, "getGJScores20.php")
 	UserInfo = NewEndpoint(http.MethodPost, "getGJUserInfo20.php")
@@ -53,7 +58,9 @@ func (gd *gdClient) Request(e *Endpoint, v any) (*http.Response, error) {
 		),
 		strings.NewReader(structToURLValues(v).Encode()),
 	)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Set("User-Agent", "")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	return gd.Do(req)
@@ -79,4 +86,20 @@ func structToURLValues(item any) url.Values {
 		}
 	}
 	return res
+}
+
+func DecodeGDUserData(data []byte) (map[int]string, error) {
+	spl := strings.Split(string(data), "#")
+	user_RobFormat := strings.Split(spl[0], ":")
+	user := make(map[int]string)
+	for i, d := range user_RobFormat {
+		if i&1 == 0 {
+			k, err := strconv.Atoi(d)
+			if err != nil {
+				return nil, err
+			}
+			user[k] = user_RobFormat[i+1]
+		}
+	}
+	return user, nil
 }

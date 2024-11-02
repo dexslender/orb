@@ -65,7 +65,7 @@ func (m *Imanager) OnInteraction(data *events.InteractionCreate) {
 		}
 	case discord.AutocompleteInteraction:
 		for _, ac := range m.autocompletes {
-			if ac.Command.CommandName() == i.Data.CommandName {
+			if ac.CommandName() == i.Data.CommandName {
 				executor := func(
 					data *events.InteractionCreate,
 					i discord.AutocompleteInteraction,
