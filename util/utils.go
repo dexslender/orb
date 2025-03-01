@@ -11,6 +11,11 @@ var (
 	}
 )
 
+func Btoi(b bool) int {
+	if b { return 1 }
+	return 0
+}
+
 // Colors!
 const (
 	DARK     = 0x2B2D31

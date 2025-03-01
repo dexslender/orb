@@ -2,6 +2,8 @@ OUT := ".bin/orb.bot"
 VERSION := $(shell git rev-parse --short HEAD)
 FLAGS := -ldflags="-X 'main.version=${VERSION}'-w -s"
 
+.PHONY: all buildx build exec buildf run clean test check
+
 all: build
 buildx: build exec
 
@@ -20,3 +22,6 @@ clean:
 
 test:
 	go test -v .
+
+check:
+	staticcheck .

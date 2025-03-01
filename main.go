@@ -19,7 +19,7 @@ func main() {
 	// -----config
 	var config orb.Config
 	parser := hclparse.NewParser()
-	f, diags := parser.ParseHCLFile("bot.config")
+	f, diags := parser.ParseHCLFile("bot.hcl")
 	if diags.HasErrors() {
 		log.Fatal("bot.config HCL parser error: ", diags.Error())
 	}
@@ -34,7 +34,7 @@ func main() {
 	bot := orb.New(version, logger, &config)
 	bot.SetActivityManager(&util.Amanager{Logger: logger, Config: bot.Config})
 	manager := &util.Imanager{Logger: logger, Config: bot.Config, Orb: bot}
-	manager.AddCommandsFromPackage(commands.Commands)
+	manager.AddMoreCommands(commands.Commands)
 	bot.SetCommandManager(manager)
 	bot.Setup()
 }

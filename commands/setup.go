@@ -19,8 +19,6 @@ func (c *Setup) Init(add util.InteractionRegister) {
 	c.Description = "just setup/configure bot features"
 	c.DefaultMemberPermissions = json.NewNullablePtr(discord.PermissionAdministrator)
 	c.Options = []discord.ApplicationCommandOption{setup.TicketsCommand}
-
-	add.Component("ticket-open", setup.OnClickTicket)
 }
 
 func (c *Setup) Run(cctx *util.CommandContext) error {

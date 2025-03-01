@@ -5,6 +5,7 @@ import (
 
 	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/k0kubun/pp/v3"
 )
 
 var GetUserCommand = discord.ApplicationCommandOptionSubCommand{
@@ -32,21 +33,14 @@ func GetUserRun(ctx* util.CommandContext) error {
 	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
 	if err != nil { return err }
-	if user, err := util.DecodeGDUserData(data); err != nil {
-		return err
-	} else {
+	if user := util.DecodeGDData[util.PartialUser](string(data)); user != nil {
+		fuser := pp.Sprint(user) 
 		return ctx.CreateMessage(discord.NewMessageCreateBuilder().
-			AddEmbeds(discord.NewEmbedBuilder().
-				SetFooterText("Testing").
-				SetDescriptionf(
-					`Name: %s
-ID: %s
-Stars: %s
-SecretCoins: %s
-Moons: %s
-`,
-				user[1], user[2], user[3], user[13], user[52]).
-			Build()).
+			SetContentf("```ansi\n%s```", fuser).
 		Build())
 	}
+	return ctx.CreateMessage(discord.NewMessageCreateBuilder().
+		SetContent("```go\nNot found```").
+	Build())
 }
+// xd

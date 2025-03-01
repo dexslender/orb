@@ -7,10 +7,7 @@ import (
 	"github.com/disgoorg/disgo/discord"
 )
 
-type Ping struct {
-	base
-	discord.SlashCommandCreate
-}
+type Ping struct { base; discord.SlashCommandCreate }
 
 func (c *Ping) Init(add util.InteractionRegister) {
 	c.Name = "ping"

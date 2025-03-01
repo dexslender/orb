@@ -5,7 +5,7 @@ import (
 	"github.com/dexslender/orb/orb"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
+	"github.com/disgoorg/disgo/events"	
 )
 
 type Imanager struct {
@@ -84,6 +84,21 @@ func (m *Imanager) OnInteraction(data *events.InteractionCreate) {
 				go executor(data, i, m, ac)
 			}
 		}
+	case discord.ModalSubmitInteraction:
+		for _, modl := range m.modals {
+			if i.Data.CustomID == modl.CustomID {
+				go func() {
+					ctx := &ModalContext{
+						events.ModalSubmitInteractionCreate{GenericEvent: data.GenericEvent, ModalSubmitInteraction: i, Respond: data.Respond},
+						m.Logger,
+					}
+					err := modl.Run(ctx)
+					if err != nil {
+						m.Logger.Error("modal fail", "customId", i.Data.CustomID, "err", err)
+					}
+				} ()
+			}	
+		}
 	default:
 		m.Logger.Warn("unhandled interaction", "type", i.Type())
 	}
@@ -126,6 +141,13 @@ func (m *Imanager) AddCommands(cs ...Command) {
 	for _, cmd := range cs {
 		m.Command(cmd)
 	}
+}
+
+func (m *Imanager) AddMoreCommands(cmds []Command) {
+	for _, c := range cmds {
+		c.Init(m)
+	}
+	m.interactions = cmds
 }
 
 func (m *Imanager) GetCommand(query string) Command {

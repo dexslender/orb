@@ -21,7 +21,7 @@ func TestGetGDUserData(t *testing.T) {
 		t.Fatal(err)
 	}
 	// 1:RobTop:2:16:13:20:17:175:6:0:9:483:10:35:11:2:14:0:15:0:16:71:3:2774:52:117:8:0:4:5#999:0:10
-	user := DecodeData[PartialUser](string(data))
+	user := DecodeGDData[PartialUser](string(data))
 	t.Logf("%+v", user)
 }
 

@@ -31,6 +31,14 @@ type (
 		Secret      string `query:"secret"`
 		TargetAccID string `query:"targetAccountID"`
 	}
+	DailyParams struct {
+		Secret string `query:"secret"`
+		// Get Weekly?
+		//	0 - false
+		//	1 - true
+		Weekly int `query:"weekly"`
+	}
+	DownloadGJLevel22Params struct{}
 )
 
 func NewEndpoint(method, route string) *Endpoint {
@@ -46,7 +54,8 @@ var (
 	UserInfo = NewEndpoint(http.MethodPost, "getGJUserInfo20.php")
 
 	// Levels
-	Dayly = NewEndpoint(http.MethodPost, "getGJDailyLevel.php")
+	Daily         = NewEndpoint(http.MethodPost, "getGJDailyLevel.php")
+	DownloadLevel = NewEndpoint(http.MethodPost, "downloadGJLevel22.php")
 )
 
 func (gd *gdClient) Request(e *Endpoint, v any) (*http.Response, error) {

@@ -14,9 +14,8 @@ var Commands = []util.Command{
 	new(GD),
 }
 
-type base struct {
-	util.Command
-}
+// Default values
+type base struct { util.Command }
 
 func (c *base) Run(*util.CommandContext) error { return errors.New("missing run function :(") }
 

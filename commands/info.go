@@ -12,10 +12,7 @@ import (
 	"github.com/shirou/gopsutil/v4/cpu"
 )
 
-type Info struct {
-	base
-	discord.SlashCommandCreate
-}
+type Info struct { base; discord.SlashCommandCreate }
 
 func (i *Info) Init(add util.InteractionRegister) {
 	i.Name = "info"
@@ -35,9 +32,9 @@ func (i *Info) Init(add util.InteractionRegister) {
 
 func (i *Info) Run(ctx *util.CommandContext) error {
 	hidden := ctx.SlashCommandInteractionData().Bool("hidden")
-	if key, ok := ctx.SlashCommandInteractionData().OptString("about"); ok {
-		return HandleAbout(ctx, key, hidden)
-	}
+	// if key, ok := ctx.SlashCommandInteractionData().OptString("about"); ok {
+	// 	return HandleAbout(ctx, key, hidden)
+	// }
 	err := ctx.DeferCreateMessage(hidden)
 	if err != nil {
 		return err
@@ -57,83 +54,100 @@ func (i *Info) Run(ctx *util.CommandContext) error {
 	runtime.ReadMemStats(&ms)
 
 	prc, err := cpu.Percent(time.Second, true)
-	var cpu string
+	var cpu float32
 	if err != nil {
 		ctx.Logger.Error("falied to get cpu percent usage", "err", err)
 	} else {
-		for i, v := range prc {
-			cpu += fmt.Sprintf("\tcore %d: %.2f%%\n", i, v)
-		}
+			for _, core := range prc {
+				cpu+=float32(core)
+			}
+			cpu/=float32(len(prc))
 	}
 
-	usage := fmt.Sprintf("```js\n%s```", FormatSpacing(
-		"Goroutines", runtime.NumGoroutine(),
-		"Memory", ms.TotalAlloc,
-		"CPU", "\n"+cpu,
-	))
-	info := discord.NewEmbedBuilder().
-		SetAuthorName(cu.Tag()).
-		SetAuthorIcon(*cu.AvatarURL()).
-		AddFields(
-			discord.EmbedField{Name: "Counts", Value: counts, Inline: json.Ptr(true)},
-			discord.EmbedField{Name: "Stats", Value: usage, Inline: json.Ptr(true)},
-		).
-		SetFooterTextf("Version: %s", ctx.Orb.Version).
-		SetColor(util.HIGHBLUE).
-		Build()
+	usage := fmt.Sprint(
+		"```ansi\n",
+		"Goroutines: ", runtime.NumGoroutine(),
+		"\nMemory: ", GenUsageBar(float32(ms.Sys), float32(ms.TotalAlloc), 10),
+		"\nCPU:    ", GenUsageBar(100, cpu, 10),
+		"```",
+	)
 
 	_, err = ctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-		AddEmbeds(info).
-		Build())
+		AddEmbeds(discord.NewEmbedBuilder().
+			SetAuthorName(cu.Tag()).
+			SetAuthorIcon(*cu.AvatarURL()).
+			AddFields(
+				discord.EmbedField{Name: "Counts", Value: counts, Inline: json.Ptr(true)},
+				discord.EmbedField{Name: "Stats", Value: usage, Inline: json.Ptr(false)},
+			).
+			SetFooterTextf("Version: %s", ctx.Orb.Version).
+			SetColor(util.HIGHBLUE).
+		Build()).
+	Build())
 	return err
 }
 
 func (i Info) autocomplete(ac *util.AutocompleteContext) (choices []discord.AutocompleteChoice) {
-	query, ok := ac.Data.OptString("about")
-	if !ok { return nil }
-	for k, a := range abouts {
-		if query != "" {
-			if strings.Contains(a.Name, query) {
-				choices = append(choices, discord.AutocompleteChoiceString{
-					Name:  a.Name,
-					Value: k,
-				})
-			}
-			continue
-		}
-		choices = append(choices, discord.AutocompleteChoiceString{
-			Name:  a.Name,
-			Value: k,
-		})
-	}
-	return
+	return nil
+	// query, ok := ac.Data.OptString("about")
+	// if !ok { return nil }
+	// if len(infos) <= 0 {
+	// 	for _, c := range Commands {
+	// 		if i := c.Info(); i != nil {
+	// 			infos[i.Name] = i
+	// 		}
+	// 	}
+	// }
+	// for k, a := range infos {
+	// 	if query != "" {
+	// 		if strings.Contains(a.Name, query) {
+	// 			choices = append(choices, discord.AutocompleteChoiceString{
+	// 				Name:  a.Name,
+	// 				Value: k,
+	// 			})
+	// 		}
+	// 	} else {
+	// 		choices = append(choices, discord.AutocompleteChoiceString{
+	// 			Name:  a.Name,
+	// 			Value: k,
+	// 		})
+	// 	}
+	// }
+	// return
 }
 
-func HandleAbout(ctx *util.CommandContext, key string, hidden bool) error {
-	a := abouts[key]
-	return ctx.CreateMessage(
-		discord.NewMessageCreateBuilder().
-		AddEmbeds(discord.NewEmbedBuilder().
-			SetTitle(a.Name).
-			SetDescription(a.Description).
-			AddFields(a.Details...).
-			SetColor(util.LOWBLUE).
-			Embed).
-		SetEphemeral(hidden).
-		MessageCreate)
-}
+// func HandleAbout(ctx *util.CommandContext, key string, hidden bool) error {
+// 	if len(infos) <= 0 {
+// 		for _, c := range Commands {
+// 			if i := c.Info(); i != nil {
+// 				infos[i.Name] = i
+// 			}
+// 		}
+// 	}
+// 	a := infos[key]
+// 	return ctx.CreateMessage(
+// 		discord.NewMessageCreateBuilder().
+// 			AddEmbeds(discord.NewEmbedBuilder().
+// 				SetTitle(a.Name).
+// 				SetDescription(a.Description).
+// 				AddFields(a.Details...).
+// 				SetColor(util.LOWBLUE).
+// 				Embed).
+// 			SetEphemeral(hidden).
+// 			MessageCreate)
+// }
 
 func FormatSpacing(keyvals ...any) (s string) {
 	max := 0
 	for i, v := range keyvals {
-		if i%2 == 0 {
+		if i&1 == 0 {
 			if len(v.(string)) > max {
 				max = len(v.(string))
 			}
 		}
 	}
 	for i, v := range keyvals {
-		if i%2 == 0 {
+		if i&1 == 0 {
 			addings := max - len(v.(string)) + 1
 			s += fmt.Sprintf("%v:%s", v, strings.Repeat(" ", addings))
 		} else {
@@ -142,3 +156,19 @@ func FormatSpacing(keyvals ...any) (s string) {
 	}
 	return
 }
+// https://go.dev/play/p/VdsqNKtr9GX
+func GenUsageBar(total, used float32, size int) string {
+	color := 32
+	fill, empty := "\u25b0", "\u25b1"
+	percent := float32((100*used) / total)
+	if percent >= 66.666666 { color = 31 } else
+	if percent >= 33.333333 { color = 33 }
+	amount := int(percent / (100 / float32(size)))
+	return fmt.Sprintf("\x1b[%dm%s%s\x1b[0m %.2f%%",
+		color,
+		strings.Repeat(fill, amount),
+		strings.Repeat(empty, size-amount),
+		percent,
+	)	
+}
+

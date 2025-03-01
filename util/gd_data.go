@@ -6,9 +6,10 @@ import (
 	"strings"
 )
 
-func DecodeData[T any](data string) *T {
+func DecodeGDData[T any](data string) *T {
 	spl := strings.Split(data, "#")
 	RobFormat := strings.Split(spl[0], ":")
+	if len(RobFormat) <= 1 { return nil }
 
 	gd := make(map[string]string)
 	for i, key := range RobFormat {
@@ -105,3 +106,5 @@ type User struct {
 	ClassicLevels       string `rob:"56"` // format {auto},{easy},{normal},{hard},{harder},{insane},{daily},{gauntlet}
 	PlatformerLevels    string `rob:"57"` // {auto},{easy},{normal},{hard},{harder},{insane}
 }
+
+type Level struct {}

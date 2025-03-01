@@ -25,7 +25,7 @@ type (
 			Enabled     bool          `hcl:"enabled"`
 			OnlineMobil bool          `hcl:"online_movil"`
 			Interval    time.Duration `hcl:"interval"`
-			Activities   []Activity    `hcl:"activity,block"`
+			Activities  []Activity    `hcl:"activity,block"`
 		} `hcl:"activity_manager,block"`
 	}
 	Activity struct {
@@ -70,17 +70,19 @@ func HCLctx(l *log.Logger) *hcl.EvalContext {
 				Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 					k := args[0].AsString()
 					v := os.Getenv(k)
-					if v == "" { l.Warn("empty env-var", k, v) }
+					if v == "" {
+						l.Warn("empty env-var", k, v)
+					}
 					return cty.StringVal(v), nil
 				},
 			}),
 			"duration": function.New(&function.Spec{
 				Params: []function.Parameter{{
-					Name: "format", 
-					Type: cty.String, 
+					Name:             "format",
+					Type:             cty.String,
 					AllowDynamicType: true,
 				}},
-				Type:   function.StaticReturnType(cty.Number),
+				Type: function.StaticReturnType(cty.Number),
 				Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 					out, err := time.ParseDuration(args[0].AsString())
 					return cty.NumberIntVal(int64(out)), err

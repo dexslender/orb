@@ -5,7 +5,7 @@ type InteractionRegister interface {
 	Component(string, ComponentHandle)
 	Autocomplete(Command, AutocompleteHandle)
 	Modal(string, ModalHandle)
-	// TODO: Add specific as Button()
+	// TODO: Add specific as Button() Modal() SelectMenu()
 }
 
 // Add Command handler to Manager
@@ -16,16 +16,8 @@ func (m *Imanager) Command(cmd Command) {
 		} else {
 			m.interactions = append(m.interactions, cmd)
 		}
-
 	}()
 	cmd.Init(m)
-}
-
-func (m *Imanager) AddCommandsFromPackage(cmds []Command) {
-	for _, c := range cmds {
-		c.Init(m)
-	}
-	m.interactions = cmds
 }
 
 func (m *Imanager) Component(customId string, handle ComponentHandle) {
@@ -38,6 +30,6 @@ func (m *Imanager) Autocomplete(c Command, f AutocompleteHandle) {
 	m.autocompletes = append(m.autocompletes, Autocomplete{c, f})
 }
 
-func (m *Imanager) Modal(_ string, _ ModalHandle) {
-	panic("not implemented") // TODO: Implement
+func (m *Imanager) Modal(modalId string, handle ModalHandle) {
+	m.modals = append(m.modals, Modal{modalId, handle})
 }
