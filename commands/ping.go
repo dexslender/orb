@@ -12,6 +12,8 @@ type Ping struct { base; discord.SlashCommandCreate }
 func (c *Ping) Init(add util.InteractionRegister) {
 	c.Name = "ping"
 	c.Description = "just returns pong"
+	// TODO: Make hidden by default and fix problems (ephemeral update message only once time)
+	// c.Options = []discord.ApplicationCommandOption{ util.HiddenOpt }
 
 	add.Component("refresh-ping", refresh)
 }
@@ -29,7 +31,7 @@ func (c *Ping) Run(cctx *util.CommandContext) error {
 	refresh := discord.NewSecondaryButton("Refresh", "refresh-ping")
 
 	_, err = cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-		SetContentf("```yaml\n%s```", FormatSpacing(
+	SetContentf("```yaml\n%s```", util.FormatSpacing(
 			"Rest", rest,
 			"Gateway", GW,
 		)).
@@ -51,7 +53,7 @@ func refresh(cctx *util.ComponentContext) error {
 		cctx.Message.ChannelID,
 		cctx.Message.ID,
 		discord.NewMessageUpdateBuilder().
-			SetContentf("```yaml\n%s```", FormatSpacing(
+			SetContentf("```yaml\n%s```", util.FormatSpacing(
 				"Rest", rest,
 				"Gateway", GW,
 			)).

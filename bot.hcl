@@ -8,10 +8,7 @@ bot {
 
 activity_manager {
   enabled = true
-  online_movil = false
+  online_movil = true
   interval = duration("10s")
   activity "Hello!" { type = custom }
-  activity "Here we go again" { type = custom }
-  activity "Use / for secret way" { type = custom }
-  activity "Tidal Wave" { type = playing }
 }

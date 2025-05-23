@@ -34,5 +34,5 @@ func TestGetUserInfo(t *testing.T) {
 	if err != nil { t.Fatal(err) }
 
 	// user := DecodeData[User](string(data))
-	t.Logf(string(data))
+	t.Log(string(data))
 }

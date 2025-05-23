@@ -10,8 +10,8 @@ var Commands = []util.Command{
 	new(Ping),
 	new(Purge),
 	new(Setup),
-	new(Info),
 	new(GD),
+	new(About),
 }
 
 // Default values

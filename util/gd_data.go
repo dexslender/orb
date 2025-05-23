@@ -29,8 +29,8 @@ func DecodeGDData[T any](data string) *T {
 }
 
 func updateStruct(data map[string]string, t reflect.Type, v reflect.Value) {
-	for i := 0; i < t.NumField(); i++ {
-		if tag, ok := t.Field(i).Tag.Lookup("rob"); ok {
+	for i := range t.NumField() {
+		if tag, ok := t.Field(i).Tag.Lookup("prop"); ok {
 			field := v.Field(i)
 			if field.CanSet() {
 				robvalue := data[tag]
@@ -53,58 +53,58 @@ func updateStruct(data map[string]string, t reflect.Type, v reflect.Value) {
 }
 
 type PartialUser struct {
-	UserName      string `rob:"1"`
-	UserID        int    `rob:"2"`
-	Stars         int    `rob:"3"`
-	Demons        int    `rob:"4"`
-	Ranking       int    `rob:"6"`
-	CreatorPoints int    `rob:"8"`
-	IconID        int    `rob:"9"`
-	Color         int    `rob:"10"`
-	Color2        int    `rob:"11"`
-	SecretCoins   int    `rob:"13"`
-	IconType      int    `rob:"14"`
-	Special       int    `rob:"15"`
-	AccountID     int    `rob:"16"`
-	UserCoins     int    `rob:"17"`
-	Moons         int    `rob:"52"`
+	UserName      string `prop:"1"`
+	UserID        int    `prop:"2"`
+	Stars         int    `prop:"3"`
+	Demons        int    `prop:"4"`
+	Ranking       int    `prop:"6"`
+	CreatorPoints int    `prop:"8"`
+	IconID        int    `prop:"9"`
+	Color         int    `prop:"10"`
+	Color2        int    `prop:"11"`
+	SecretCoins   int    `prop:"13"`
+	IconType      int    `prop:"14"`
+	Special       int    `prop:"15"`
+	AccountID     int    `prop:"16"`
+	UserCoins     int    `prop:"17"`
+	Moons         int    `prop:"52"`
 }
 
 type User struct {
-	PartialUser `rob:"-"`
-	AccountHighlight    int    `rob:"7"`
-	MessageState        int    `rob:"18"` // 0: All, 1: Only friends, 2: None
-	FriendsState        int    `rob:"19"` // 0: All, 1: None
-	YouTube             string `rob:"20"`
-	AccIcon             int    `rob:"21"`
-	AccShip             int    `rob:"22"`
-	AccBall             int    `rob:"23"`
-	AccBird             int    `rob:"24"`
-	AccDart             int    `rob:"25"` // Wave
-	AccRobot            int    `rob:"26"`
-	AccStreak           int    `rob:"27"`
-	AccGlow             int    `rob:"28"`
-	IsRegistered        int    `rob:"29"`
-	GlobalRank          int    `rob:"30"`
-	FriendState         int    `rob:"31"` // 0: None, 1: already is friend, 3: send request to target, but target haven't accept, 4: target send request, but haven't accept
-	Messages            int    `rob:"38"`
-	FriendRequests      int    `rob:"39"`
-	NewFriends          int    `rob:"40"`
-	NewFriendRequest    bool   `rob:"41"`
-	Age                 string `rob:"42"`
-	AccSpider           int    `rob:"43"`
-	Twitter             string `rob:"44"`
-	Twitch              string `rob:"45"`
-	Diamonds            int    `rob:"46"`
-	AccExplosion        int    `rob:"48"`
-	ModLevel            int    `rob:"49"` // 0: None, 1: Normal Mod(yellow), 2: Elder Mod(orange)
-	CommentHistoryState int    `rob:"50"` // 0: All, 1: Only friends, 2: None
-	Color3              int    `rob:"51"`
-	AccSwing            int    `rob:"53"`
-	AccJetpack          int    `rob:"54"`
-	Demonsf             string `rob:"55"` // format {easy},{medium},{hard}.{insane},{extreme},{easyPlatformer},{mediumPlatformer},{hardPlatformer},{insanePlatformer},{extremePlatformer},{weekly},{gauntlet}
-	ClassicLevels       string `rob:"56"` // format {auto},{easy},{normal},{hard},{harder},{insane},{daily},{gauntlet}
-	PlatformerLevels    string `rob:"57"` // {auto},{easy},{normal},{hard},{harder},{insane}
+	PartialUser `prop:"-"`
+	AccountHighlight    int    `prop:"7"`
+	MessageState        int    `prop:"18"` // 0: All, 1: Only friends, 2: None
+	FriendsState        int    `prop:"19"` // 0: All, 1: None
+	YouTube             string `prop:"20"`
+	AccIcon             int    `prop:"21"`
+	AccShip             int    `prop:"22"`
+	AccBall             int    `prop:"23"`
+	AccBird             int    `prop:"24"`
+	AccDart             int    `prop:"25"` // Wave
+	AccRobot            int    `prop:"26"`
+	AccStreak           int    `prop:"27"`
+	AccGlow             int    `prop:"28"`
+	IsRegistered        int    `prop:"29"`
+	GlobalRank          int    `prop:"30"`
+	FriendState         int    `prop:"31"` // 0: None, 1: already is friend, 3: send request to target, but target haven't accept, 4: target send request, but haven't accept
+	Messages            int    `prop:"38"`
+	FriendRequests      int    `prop:"39"`
+	NewFriends          int    `prop:"40"`
+	NewFriendRequest    bool   `prop:"41"`
+	Age                 string `prop:"42"`
+	AccSpider           int    `prop:"43"`
+	Twitter             string `prop:"44"`
+	Twitch              string `prop:"45"`
+	Diamonds            int    `prop:"46"`
+	AccExplosion        int    `prop:"48"`
+	ModLevel            int    `prop:"49"` // 0: None, 1: Normal Mod(yellow), 2: Elder Mod(orange)
+	CommentHistoryState int    `prop:"50"` // 0: All, 1: Only friends, 2: None
+	Color3              int    `prop:"51"`
+	AccSwing            int    `prop:"53"`
+	AccJetpack          int    `prop:"54"`
+	Demonsf             string `prop:"55"` // format {easy},{medium},{hard}.{insane},{extreme},{easyPlatformer},{mediumPlatformer},{hardPlatformer},{insanePlatformer},{extremePlatformer},{weekly},{gauntlet}
+	ClassicLevels       string `prop:"56"` // format {auto},{easy},{normal},{hard},{harder},{insane},{daily},{gauntlet}
+	PlatformerLevels    string `prop:"57"` // {auto},{easy},{normal},{hard},{harder},{insane}
 }
 
 type Level struct {}

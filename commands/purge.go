@@ -90,7 +90,7 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 			Build())
 		if err != nil { return err }
 
-		action, close := bot.NewEventCollector[*events.ComponentInteractionCreate](
+		action, close := bot.NewEventCollector(
 			cctx.Orb,
 			func(e *events.ComponentInteractionCreate) bool { 
 				return e.Message.ID == msg.ID && e.User().ID == cctx.User().ID
