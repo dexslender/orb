@@ -18,14 +18,15 @@ type Amanager struct {
 }
 
 func (a *Amanager) SetupActivity() gateway.ConfigOpt {
-	return func(c *gateway.Config) {
-		if a.Config.ActivityManager.Enabled && a.size() >= 1 {
-			a.Logger.Debug("configuring presence in gateway", "current", a.current)
-			c.Presence = a.next()
-		} else {
-			a.Logger.Info("activity disabled")
-		}
-	}
+	return nil
+// 	return func(c *gateway.config) {
+// 		if a.Config.ActivityManager.Enabled && a.size() >= 1 {
+// 			a.Logger.Debug("configuring presence in gateway", "current", a.current)
+// 			c.Presence = a.next()
+// 		} else {
+// 			a.Logger.Info("activity disabled")
+// 		}
+// 	}
 }
 
 // Go func (*_*)
@@ -40,8 +41,8 @@ func (a *Amanager) StartActivityUpdater(c bot.Client) {
 			continue
 		}
 		a.Logger.Debug("updating presence", "current", a.current)
-		c.Gateway().Presence().Activities = act.Activities
-		c.Gateway().Presence().Status = act.Status
+		c.Gateway.Presence().Activities = act.Activities
+		c.Gateway.Presence().Status = act.Status
 		if err := c.SetPresence(context.Background()); err != nil {
 			a.Logger.Error("failed to send: presence data -> gateway", "err", err)
 		}

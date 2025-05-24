@@ -13,5 +13,5 @@ type ActivityManager interface {
 
 type InteractionManager interface {
 	OnInteraction(data *events.InteractionCreate)
-	SetupCommands(bot.Client)
+	SetupCommands()
 }

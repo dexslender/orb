@@ -59,7 +59,7 @@ func RunTickets(cctx *util.CommandContext) error {
 	err := cctx.CreateMessage(discord.NewMessageCreateBuilder().
 	AddEmbeds(stickets).
 	SetEphemeral(true).
-	AddContainerComponents(actions).
+	AddComponents(actions).
 	Build())
 	if err != nil { return err }
 	return nil

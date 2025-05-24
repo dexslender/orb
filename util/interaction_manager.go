@@ -3,7 +3,6 @@ package util
 import (
 	"github.com/charmbracelet/log"
 	"github.com/dexslender/orb/orb"
-	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"	
 )
@@ -104,7 +103,7 @@ func (m *Imanager) OnInteraction(data *events.InteractionCreate) {
 	}
 }
 
-func (m *Imanager) SetupCommands(c bot.Client) {
+func (m *Imanager) SetupCommands() {
 	var up []discord.ApplicationCommandCreate
 	for _, cmd := range m.interactions {
 		up = append(up, cmd)
@@ -115,13 +114,13 @@ func (m *Imanager) SetupCommands(c bot.Client) {
 			ok  []discord.ApplicationCommand
 		)
 		if m.Config.Bot.GlobalCommands {
-			ok, err = c.Rest().SetGlobalCommands(
-				c.ApplicationID(),
+			ok, err = m.Client.Rest.SetGlobalCommands(
+				m.Client.ApplicationID,
 				up,
 			)
 		} else if m.Config.Bot.GuildID != 0 {
-			ok, err = c.Rest().SetGuildCommands(
-				c.ApplicationID(),
+			ok, err = m.Client.Rest.SetGuildCommands(
+				m.Client.ApplicationID,
 				m.Config.Bot.GuildID,
 				up,
 			)

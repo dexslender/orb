@@ -24,11 +24,11 @@ func BotStatsRun(ctx *util.CommandContext, cmdLen int) error {
 	err := ctx.DeferCreateMessage(hidden)
 	if err != nil { return err }
 
-	cUser, err := ctx.Client().Rest().GetCurrentUser("")
+	cUser, err := ctx.Client().Rest.GetCurrentUser("")
 	if err != nil { return err }
 
 	counts := fmt.Sprintf("```js\n%s```", util.FormatSpacing(
-		"Guilds", ctx.Orb.Caches().GuildsLen(),
+		"Guilds", ctx.Client().Caches.GuildsLen(),
 		"Commands", cmdLen,
 	))
 

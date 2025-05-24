@@ -25,7 +25,7 @@ func (c *Ping) Run(cctx *util.CommandContext) error {
 		return err
 	}
 	rest := time.Since(s).Round(time.Millisecond)
-	GW := cctx.Client().Gateway().
+	GW := cctx.Client().Gateway.
 		Latency().Round(time.Millisecond)
 
 	refresh := discord.NewSecondaryButton("Refresh", "refresh-ping")
@@ -48,8 +48,8 @@ func refresh(cctx *util.ComponentContext) error {
 		return err
 	}
 	rest := time.Since(s).Round(time.Millisecond)
-	GW := cctx.Client().Gateway().Latency().Round(time.Millisecond)
-	_, err = cctx.Client().Rest().UpdateMessage(
+	GW := cctx.Client().Gateway.Latency().Round(time.Millisecond)
+	_, err = cctx.Client().Rest.UpdateMessage(
 		cctx.Message.ChannelID,
 		cctx.Message.ID,
 		discord.NewMessageUpdateBuilder().

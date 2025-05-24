@@ -9,7 +9,7 @@ import (
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-	"github.com/disgoorg/json"
+	"github.com/disgoorg/omit"
 	"github.com/disgoorg/snowflake/v2"
 )
 
@@ -21,14 +21,14 @@ type Purge struct {
 func (c *Purge) Init(util.InteractionRegister) {
 	c.Name = "purge"
 	c.Description = "just deletes messages from current channel"
-	c.DefaultMemberPermissions = json.NewNullablePtr(discord.PermissionManageMessages)
+	c.DefaultMemberPermissions = omit.NewPtr(discord.PermissionManageMessages)
 	c.Options = []discord.ApplicationCommandOption{
 		discord.ApplicationCommandOptionInt{
 			Name:        "amount",
 			Description: "Amount of messages of delete.",
 			Required:    true,
-			MinValue:    json.Ptr(2),
-			MaxValue:    json.Ptr(100),
+			MinValue:    omit.Ptr(2),
+			MaxValue:    omit.Ptr(100),
 		},
 	}
 }
@@ -46,7 +46,7 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 	msg, err := cctx.GetInteractionResponse()
 	if err != nil { return err }
 
-	msgs, err := cctx.Client().Rest().
+	msgs, err := cctx.Client().Rest.
 		GetMessages(cctx.Channel().ID(), 0, msg.ID, 0, amount)
 	if err != nil { return err }
 
@@ -91,7 +91,7 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 		if err != nil { return err }
 
 		action, close := bot.NewEventCollector(
-			cctx.Orb,
+			cctx.Client(),
 			func(e *events.ComponentInteractionCreate) bool { 
 				return e.Message.ID == msg.ID && e.User().ID == cctx.User().ID
 			 },
@@ -107,9 +107,9 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 			case "purge-yes":
 				cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 					SetContentf("Deleting %d messages...", len(deleting)).
-					ClearContainerComponents().
+					ClearComponents().
 					Build())
-				err = cctx.Client().Rest().
+				err = cctx.Client().Rest.
 					BulkDeleteMessages(cctx.Channel().ID(), deleting)
 				if err != nil { return err }
 				_, err = cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
@@ -130,7 +130,7 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 			case "purge-no":
 				_, err := cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 					SetContent("Ok, cancelled :)").
-					ClearContainerComponents().
+					ClearComponents().
 					Build())
 				return err
 			default: return nil
@@ -138,19 +138,19 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 		case <-ctx.Done():
 			_, err := cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 				SetContent("Ok, doing nothing").
-				ClearContainerComponents().
+				ClearComponents().
 				Build())
 			return err
 		}
 	} else {
 		cctx.UpdateInteractionResponse(discord.MessageUpdate{
-			Content: json.Ptr(fmt.Sprintf("Deleting %d messages...", len(deleting))),
+			Content: omit.Ptr(fmt.Sprintf("Deleting %d messages...", len(deleting))),
 		})
-		err = cctx.Client().Rest().
+		err = cctx.Client().Rest.
 			BulkDeleteMessages(cctx.Channel().ID(), deleting)
 		if err != nil { return err }
 		_, err = cctx.UpdateInteractionResponse(discord.MessageUpdate{
-			Content: json.Ptr(fmt.Sprintf("Deleted %d messages ||destroying %s||",
+			Content: omit.Ptr(fmt.Sprintf("Deleted %d messages ||destroying %s||",
 				len(deleting),
 				discord.NewTimestamp(discord.TimestampStyleRelative, time.Now().Add(autodelete))),
 			),
