@@ -4,8 +4,9 @@ go 1.24
 
 require (
 	github.com/charmbracelet/log v0.4.2
-	github.com/disgoorg/disgo v0.18.17-0.20250523015103-a87bbab7765b
+	github.com/disgoorg/disgo v0.18.17-0.20250527183904-16a465752876
 	github.com/disgoorg/json v1.2.0
+	github.com/disgoorg/omit v1.0.0
 	github.com/disgoorg/snowflake/v2 v2.0.3
 	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/k0kubun/pp/v3 v3.4.1
@@ -23,7 +24,6 @@ require (
 	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/disgoorg/json/v2 v2.0.0 // indirect
-	github.com/disgoorg/omit v1.0.0 // indirect
 	github.com/ebitengine/purego v0.8.4 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect

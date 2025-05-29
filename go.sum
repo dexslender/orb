@@ -38,6 +38,8 @@ github.com/disgoorg/disgo v0.18.16 h1:Yk6pA9TaGbuM4hWfWafH0jAfmkWvZBFY7rh49DgljG
 github.com/disgoorg/disgo v0.18.16/go.mod h1:dXYVH059d6aK7mI+Nh/3svSRWedNd09P7C2VX3RqbJY=
 github.com/disgoorg/disgo v0.18.17-0.20250523015103-a87bbab7765b h1:HMZXOp959y8Fmqdl80VEVe9BWw6IZSbT92u+4f2VwtY=
 github.com/disgoorg/disgo v0.18.17-0.20250523015103-a87bbab7765b/go.mod h1:3jeXsdHzg0aLx/vg7fB0ifOvSmC9bLYxjJBo0EbT+qk=
+github.com/disgoorg/disgo v0.18.17-0.20250527183904-16a465752876 h1:HTg0UAMKCoEbIxt25gI5lqFSSTUGft7DkRcXfncrTkM=
+github.com/disgoorg/disgo v0.18.17-0.20250527183904-16a465752876/go.mod h1:3jeXsdHzg0aLx/vg7fB0ifOvSmC9bLYxjJBo0EbT+qk=
 github.com/disgoorg/json v1.2.0 h1:6e/j4BCfSHIvucG1cd7tJPAOp1RgnnMFSqkvZUtEd1Y=
 github.com/disgoorg/json v1.2.0/go.mod h1:BHDwdde0rpQFDVsRLKhma6Y7fTbQKub/zdGO5O9NqqA=
 github.com/disgoorg/json/v2 v2.0.0 h1:U16yy/ARK7/aEpzjjqK1b/KaqqGHozUdeVw/DViEzQI=
