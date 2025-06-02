@@ -7,11 +7,11 @@ import (
 )
 
 type ActivityManager interface {
-	SetupActivity() gateway.ConfigOpt
+	SetupActivity() gateway.PresenceOpt
 	StartActivityUpdater(bot.Client)
 }
 
 type InteractionManager interface {
 	OnInteraction(data *events.InteractionCreate)
-	SetupCommands(bot.Client)
+	SetupCommands()
 }

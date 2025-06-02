@@ -24,11 +24,11 @@ func BotStatsRun(ctx *util.CommandContext, cmdLen int) error {
 	err := ctx.DeferCreateMessage(hidden)
 	if err != nil { return err }
 
-	cUser, err := ctx.Client().Rest().GetCurrentUser("")
-	if err != nil { return err }
+	// cUser, err := ctx.Client().Rest.GetCurrentUser("")
+	// if err != nil { return err }
 
 	counts := fmt.Sprintf("```js\n%s```", util.FormatSpacing(
-		"Guilds", ctx.Orb.Caches().GuildsLen(),
+		"Guilds", ctx.Client().Caches.GuildsLen(),
 		"Commands", cmdLen,
 	))
 
@@ -53,18 +53,14 @@ func BotStatsRun(ctx *util.CommandContext, cmdLen int) error {
 		"\nCPU:    ", util.GenUsageBar(100, cpu, 10),
 		"```",
 	)
-
 	_, err = ctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-		AddEmbeds(discord.NewEmbedBuilder().
-			SetAuthorName(cUser.Tag()).
-			SetAuthorIcon(*cUser.AvatarURL()).
-			AddFields(
-				discord.EmbedField{Name: "Counts", Value: counts},
-				discord.EmbedField{Name: "Stats", Value: usage},
-			).
-			SetFooterText("Version: "+ctx.Orb.Version).
-			SetColor(util.HIGHBLUE).
-		Build()).
-	Build())
+		AddComponents(discord.NewContainer(
+			discord.NewTextDisplay("**Counts**\n"+counts),
+			discord.NewTextDisplay("**Stats**"+usage),
+			discord.NewSmallSeparator(),
+			discord.NewTextDisplayf("-# Version: %s", ctx.Orb.Version),
+		)).
+		AddFlags(discord.MessageFlagIsComponentsV2).
+		Build())
 	return err
 }

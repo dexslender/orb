@@ -24,7 +24,7 @@ func New(ver string, logger *log.Logger, config *Config) *Orb {
 }
 
 type Orb struct {
-	bot.Client
+	*bot.Client
 	InteractionManager
 	ActivityManager
 	Config  *Config
@@ -36,17 +36,18 @@ func (o *Orb) Setup() {
 	var err error
 	o.Client, err = disgo.New(o.Config.Bot.Token,
 		bot.WithGatewayConfigOpts(
-			func(config *gateway.Config) {
-				if o.Config.ActivityManager.OnlineMobil {
-					config.Browser = "Discord Android"
-				}
-			},
 			gateway.WithIntents(
 				gateway.IntentsNonPrivileged,
 				gateway.IntentGuilds,
 			),
 			gateway.WithCompress(true),
-			o.SetupActivity(),
+			gateway.WithBrowser(func() string {
+				if o.Config.ActivityManager.OnlineMobil {
+					return "Discord Android"
+				}
+				return ""
+			} ()),
+			gateway.WithPresenceOpts(o.SetupActivity()),
 		),
 		bot.WithLogger(slog.New(o.Log)),
 		bot.WithEventListeners(listeners(o)),
@@ -57,7 +58,7 @@ func (o *Orb) Setup() {
 	if err != nil {
 		o.Log.Fatal("client error", "err", err)
 	}
-	o.SetupCommands(o)
+	o.SetupCommands()
 	o.StartNLock()
 }
 

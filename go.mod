@@ -1,30 +1,30 @@
 module github.com/dexslender/orb
 
-go 1.23.0
-
-toolchain go1.24.0
+go 1.24
 
 require (
-	github.com/charmbracelet/log v0.4.1
-	github.com/disgoorg/disgo v0.18.15
+	github.com/charmbracelet/log v0.4.2
+	github.com/disgoorg/disgo v0.18.17-0.20250531222024-8ac2ef071ad5
 	github.com/disgoorg/json v1.2.0
+	github.com/disgoorg/omit v1.0.0
 	github.com/disgoorg/snowflake/v2 v2.0.3
 	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/k0kubun/pp/v3 v3.4.1
-	github.com/shirou/gopsutil/v4 v4.25.3
-	github.com/zclconf/go-cty v1.16.2
+	github.com/shirou/gopsutil/v4 v4.25.4
+	github.com/zclconf/go-cty v1.16.3
 )
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/charmbracelet/colorprofile v0.3.0 // indirect
+	github.com/charmbracelet/colorprofile v0.3.1 // indirect
 	github.com/charmbracelet/lipgloss v1.1.0 // indirect
-	github.com/charmbracelet/x/ansi v0.8.0 // indirect
+	github.com/charmbracelet/x/ansi v0.9.2 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
-	github.com/ebitengine/purego v0.8.2 // indirect
+	github.com/disgoorg/json/v2 v2.0.0 // indirect
+	github.com/ebitengine/purego v0.8.4 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -43,11 +43,11 @@ require (
 	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	golang.org/x/crypto v0.37.0 // indirect
-	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
+	golang.org/x/crypto v0.38.0 // indirect
+	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6 // indirect
 	golang.org/x/mod v0.24.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
-	golang.org/x/tools v0.32.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/tools v0.33.0 // indirect
 )

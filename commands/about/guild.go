@@ -51,7 +51,7 @@ func GuildRun(ctx *util.CommandContext) error {
 			SetTitle(guild.Name).
 			SetDescription(basic_info).
 		Build()).
-		AddContainerComponents(actions).
+		AddComponents(actions).
 	Build())
 	if err != nil { return err }
 
@@ -59,7 +59,7 @@ func GuildRun(ctx *util.CommandContext) error {
 	if err != nil { return err }
 
 	action, clos := bot.NewEventCollector(
-		ctx.Orb,
+		ctx.Client(),
 		func(e *events.ComponentInteractionCreate) bool {
 			return e.Message.ID == msg.ID && e.User().ID == ctx.User().ID 
 		},
@@ -79,7 +79,7 @@ func GuildRun(ctx *util.CommandContext) error {
 		}
 	case <-Tctx.Done():
 		_, err := ctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-			ClearContainerComponents().
+			ClearComponents().
 			Build())
 		return err
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/dexslender/orb/commands/setup"
 	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/json"
+	"github.com/disgoorg/omit"
 )
 
 type Setup struct {
@@ -17,7 +17,7 @@ type Setup struct {
 func (c *Setup) Init(add util.InteractionRegister) {
 	c.Name = "setup"
 	c.Description = "just setup/configure bot features"
-	c.DefaultMemberPermissions = json.NewNullablePtr(discord.PermissionAdministrator)
+	c.DefaultMemberPermissions = omit.NewPtr(discord.PermissionAdministrator)
 	c.Options = []discord.ApplicationCommandOption{setup.TicketsCommand}
 }
 
