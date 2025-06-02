@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/charmbracelet/log v0.4.2
-	github.com/disgoorg/disgo v0.18.17-0.20250527183904-16a465752876
+	github.com/disgoorg/disgo v0.18.17-0.20250531222024-8ac2ef071ad5
 	github.com/disgoorg/json v1.2.0
 	github.com/disgoorg/omit v1.0.0
 	github.com/disgoorg/snowflake/v2 v2.0.3

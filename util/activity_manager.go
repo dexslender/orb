@@ -17,16 +17,17 @@ type Amanager struct {
 	current int
 }
 
-func (a *Amanager) SetupActivity() gateway.ConfigOpt {
-	return nil
-// 	return func(c *gateway.config) {
-// 		if a.Config.ActivityManager.Enabled && a.size() >= 1 {
-// 			a.Logger.Debug("configuring presence in gateway", "current", a.current)
-// 			c.Presence = a.next()
-// 		} else {
-// 			a.Logger.Info("activity disabled")
-// 		}
-// 	}
+func (a *Amanager) SetupActivity() gateway.PresenceOpt {
+	return func(presenceUpdate *gateway.MessageDataPresenceUpdate) {
+		if a.Config.ActivityManager.Enabled && a.size() >= 1 {
+			a.Logger.Debug("configuring presence in gateway", "current", a.current)
+			current := a.next()
+			presenceUpdate.Activities = current.Activities
+			presenceUpdate.Status = current.Status
+		} else {
+			a.Logger.Infof("activity disabled")
+		}
+	}
 }
 
 // Go func (*_*)
