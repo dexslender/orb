@@ -29,7 +29,7 @@ func GuildRun(ctx *util.CommandContext) error {
 	if guild.Description != nil {
 		desc = "\n```"+*guild.Description+"```"
 	}
-	
+
 	basic_info := fmt.Sprint(
 		"**Created**: ", discord.NewTimestamp(discord.TimestampStyleRelative, guild.CreatedAt()),
 		"\n**Id**: ", guild.ID,
@@ -38,20 +38,21 @@ func GuildRun(ctx *util.CommandContext) error {
 		desc,
 	)
 
-	actions := discord.NewActionRow(
-		discord.NewSecondaryButton("Stats", "guild-stats"),
-		discord.NewSecondaryButton("Features", "guild-features"),
-		// discord.NewSecondaryButton("", "guild-level")
+	btnStats := discord.NewSecondaryButton("Stats", "guild-stats")
+	btnFeats := discord.NewSecondaryButton("Features", "guild-features")
+	
+	components := discord.NewContainer(
+		discord.NewSection(discord.NewTextDisplayf(
+			"**%s**\n%s",
+			guild.Name, basic_info,
+		)).WithAccessory(discord.NewThumbnail(*guild.IconURL())),
+		discord.NewSmallSeparator(),
+		discord.NewActionRow(&btnStats, &btnFeats),
 	)
 
-	err := ctx.CreateMessage(discord.NewMessageCreateBuilder().
-		SetEphemeral(ctx.SlashCommandInteractionData().Bool("hidden")).
-		AddEmbeds(discord.NewEmbedBuilder().
-			SetThumbnail(*guild.IconURL()).
-			SetTitle(guild.Name).
-			SetDescription(basic_info).
-		Build()).
-		AddComponents(actions).
+	err := ctx.CreateMessage(discord.NewMessageCreateBuilder().	
+		AddComponents(components).
+		SetIsComponentsV2(true).
 	Build())
 	if err != nil { return err }
 
@@ -65,7 +66,7 @@ func GuildRun(ctx *util.CommandContext) error {
 		},
 	)
 	defer clos()
-	Tctx, Tclos := context.WithTimeout(context.Background(), time.Minute*5)
+	Tctx, Tclos := context.WithTimeout(context.Background(), time.Minute*10)
 	defer Tclos()
 	select {
 	case button := <-action:
@@ -78,9 +79,11 @@ func GuildRun(ctx *util.CommandContext) error {
 			return button.DeferUpdateMessage()
 		}
 	case <-Tctx.Done():
+		btnStats.Disabled = true
+		btnFeats.Disabled = true
 		_, err := ctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-			ClearComponents().
-			Build())
+			SetComponents(components).
+		Build())
 		return err
 	}
 }
