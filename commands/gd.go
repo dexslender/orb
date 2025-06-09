@@ -2,25 +2,20 @@ package commands
 
 import (
 	"github.com/dexslender/orb/commands/gd"
-	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/handler"
 )
 
-type GD struct {
-	base
-	discord.SlashCommandCreate
-}
-
-func (c *GD) Init(util.InteractionRegister) {
-	c.Name = "gd"
-	c.Description = "Utilities to interact with Geometry Dash servers."
-	c.Options = []discord.ApplicationCommandOption{
+var gdCmd = discord.SlashCommandCreate{
+	Name: "gd",
+	Description: "Utilities to interact with Geometry Dash servers.",
+	Options: []discord.ApplicationCommandOption{
 		gd.GetUserCommand,
 		gd.GetDailyCommand,
-	}
+	},
 }
 
-func (c *GD) Run(ctx *util.CommandContext) error {
+func runGD(ctx *handler.CommandEvent) error {
 	subcmd := ctx.SlashCommandInteractionData().SubCommandName
 	switch *subcmd {
 	case "get-user":

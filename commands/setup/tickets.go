@@ -1,8 +1,8 @@
 package setup
 
 import (
-	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/handler"
 	"github.com/disgoorg/json"
 )
 
@@ -33,7 +33,7 @@ var ticketChannelDefaultConfig discord.GuildChannelCreate = discord.GuildTextCha
 	// PermissionOverwrites: [], // TODO: needed to prevent messages from unauthorized users
 }
 
-func RunTickets(cctx *util.CommandContext) error {
+func RunTickets(cctx *handler.CommandEvent) error {
 	stickets := discord.NewEmbedBuilder().
 		SetTitle("Ticket System Setup Wizard").
 		SetDescription("Select type of ticket system\nUsers wishing to open a ticket must:").

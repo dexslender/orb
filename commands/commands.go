@@ -1,31 +1,21 @@
 package commands
 
 import (
-	"errors"
-
-	"github.com/dexslender/orb/util"
+	"github.com/dexslender/orb/orb"
+	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/handler"
 )
 
-var Commands = []util.Command{
-	new(Ping),
-	new(Purge),
-	new(Setup),
-	new(GD),
-	new(About),
+var List = []discord.ApplicationCommandCreate{
+	ping,
+	purge,
+	setupCmd,
+	gdCmd,
+	aboutCmd,
 }
 
-// Default values
-type base struct { util.Command }
-
-func (c *base) Run(*util.CommandContext) error { return errors.New("missing run function :(") }
-
-func (c *base) Error(cctx *util.CommandContext, err error) {
-	command := cctx.Data.CommandName()
-	if sub := cctx.SlashCommandInteractionData().SubCommandName; sub != nil {
-		command+="/"+*sub
-	}
-	cctx.Logger.Error("command returned error",
-		"command", command,
-		"error", err,
-	)
+func Setup(o *orb.Orb, router handler.Router) {
+	router.Group(func(r handler.Router) {
+		r.Command("/about/{sub}", runAbout(o))
+	})
 }

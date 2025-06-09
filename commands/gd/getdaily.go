@@ -5,6 +5,7 @@ import (
 
 	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/handler"
 )
 
 var GetDailyCommand = discord.ApplicationCommandOptionSubCommand{
@@ -19,7 +20,7 @@ var GetDailyCommand = discord.ApplicationCommandOptionSubCommand{
 	},
 }
 
-func GetDailyRun(ctx *util.CommandContext) error {
+func GetDailyRun(ctx *handler.CommandEvent) error {
 	//weekly := ctx.SlashCommandInteractionData().Bool("weekly")
 	
 	res, err := util.GDClient.Request(

@@ -5,20 +5,15 @@ import (
 
 	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/handler"
 )
 
-type Ping struct { base; discord.SlashCommandCreate }
-
-func (c *Ping) Init(add util.InteractionRegister) {
-	c.Name = "ping"
-	c.Description = "just returns pong"
-	// TODO: Make hidden by default and fix problems (ephemeral update message only once time)
-	// c.Options = []discord.ApplicationCommandOption{ util.HiddenOpt }
-
-	add.Component("refresh-ping", refresh)
+var ping = discord.SlashCommandCreate{
+	Name: "ping",
+	Description: "just returns pong",
 }
 
-func (c *Ping) Run(cctx *util.CommandContext) error {
+func runPing(cctx *handler.CommandEvent) error {
 	s := time.Now()
 	err := cctx.DeferCreateMessage(false)
 	if err != nil {
@@ -31,7 +26,7 @@ func (c *Ping) Run(cctx *util.CommandContext) error {
 	refresh := discord.NewSecondaryButton("Refresh", "refresh-ping")
 
 	_, err = cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-	SetContentf("```yaml\n%s```", util.FormatSpacing(
+		SetContentf("```yaml\n%s```", util.FormatSpacing(
 			"Rest", rest,
 			"Gateway", GW,
 		)).
@@ -41,7 +36,7 @@ func (c *Ping) Run(cctx *util.CommandContext) error {
 	return err
 }
 
-func refresh(cctx *util.ComponentContext) error {
+func runPingRefresh(cctx *handler.ComponentEvent) error {
 	s := time.Now()
 	err := cctx.DeferUpdateMessage()
 	if err != nil {
@@ -57,7 +52,7 @@ func refresh(cctx *util.ComponentContext) error {
 				"Rest", rest,
 				"Gateway", GW,
 			)).
-			Build(),
+		Build(),
 	)
 	return err
 }

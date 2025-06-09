@@ -5,24 +5,19 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/disgoorg/disgo/handler"
 	"github.com/disgoorg/omit"
 	"github.com/disgoorg/snowflake/v2"
 )
 
-type Purge struct {
-	base
-	discord.SlashCommandCreate
-}
-
-func (c *Purge) Init(util.InteractionRegister) {
-	c.Name = "purge"
-	c.Description = "just deletes messages from current channel"
-	c.DefaultMemberPermissions = omit.NewPtr(discord.PermissionManageMessages)
-	c.Options = []discord.ApplicationCommandOption{
+var purge = discord.SlashCommandCreate{
+	Name: "purge",
+	Description: "just deletes messages from current channel",
+	DefaultMemberPermissions: omit.NewPtr(discord.PermissionManageMessages),
+	Options: []discord.ApplicationCommandOption{
 		discord.ApplicationCommandOptionInt{
 			Name:        "amount",
 			Description: "Amount of messages of delete.",
@@ -30,7 +25,7 @@ func (c *Purge) Init(util.InteractionRegister) {
 			MinValue:    omit.Ptr(2),
 			MaxValue:    omit.Ptr(100),
 		},
-	}
+	},
 }
 
 const (
@@ -38,7 +33,7 @@ const (
 	limit      = 14 * 24 * time.Hour
 )
 
-func (c *Purge) Run(cctx *util.CommandContext) error {
+func runPurge(cctx *handler.CommandEvent) error {
 	amount := cctx.SlashCommandInteractionData().Int("amount")
 	err := cctx.DeferCreateMessage(false)
 	if err != nil { return err }
@@ -122,10 +117,10 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 						),
 					).
 					Build())
-				go func(cctx *util.CommandContext) {
+				go func() {
 					time.Sleep(autodelete)
 					cctx.DeleteInteractionResponse()
-				}(cctx)
+				}()
 				return err
 			case "purge-no":
 				_, err := cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
@@ -155,10 +150,10 @@ func (c *Purge) Run(cctx *util.CommandContext) error {
 				discord.NewTimestamp(discord.TimestampStyleRelative, time.Now().Add(autodelete))),
 			),
 		})
-		go func(cctx *util.CommandContext) {
+		go func() {
 			time.Sleep(autodelete)
 			cctx.DeleteInteractionResponse()
-		}(cctx)
+		}()
 		return err
 	}
 }

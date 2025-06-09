@@ -5,6 +5,7 @@ import (
 
 	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/handler"
 	"github.com/k0kubun/pp/v3"
 )
 
@@ -20,7 +21,7 @@ var GetUserCommand = discord.ApplicationCommandOptionSubCommand{
 	},
 }
 
-func GetUserRun(ctx* util.CommandContext) error {
+func GetUserRun(ctx* handler.CommandEvent) error {
 	query := ctx.SlashCommandInteractionData().String("query")
 	res, err := util.GDClient.Request(
 		util.Users,

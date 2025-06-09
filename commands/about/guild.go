@@ -9,6 +9,7 @@ import (
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/disgoorg/disgo/handler"
 )
 
 var SubGuild = &discord.ApplicationCommandOptionSubCommand{
@@ -17,7 +18,7 @@ var SubGuild = &discord.ApplicationCommandOptionSubCommand{
 	Options: []discord.ApplicationCommandOption{ util.HiddenOpt },
 }
 
-func GuildRun(ctx *util.CommandContext) error {
+func GuildRun(ctx *handler.CommandEvent) error {
 	guild, ok := ctx.Guild()
 	if !ok { 
 		return ctx.CreateMessage(discord.NewMessageCreateBuilder().

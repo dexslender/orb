@@ -5,8 +5,10 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/dexslender/orb/orb"
 	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/handler"
 	"github.com/shirou/gopsutil/v4/cpu"
 )
 
@@ -18,7 +20,7 @@ var SubBotStats = &discord.ApplicationCommandOptionSubCommand{
 	},
 }
 
-func BotStatsRun(ctx *util.CommandContext, cmdLen int) error {
+func BotStatsRun(ctx *handler.CommandEvent, o *orb.Orb, cmdLen int) error {
 	hidden := ctx.SlashCommandInteractionData().Bool("hidden")
 
 	err := ctx.DeferCreateMessage(hidden)
@@ -38,7 +40,7 @@ func BotStatsRun(ctx *util.CommandContext, cmdLen int) error {
 	prc, err := cpu.Percent(time.Second, true)
 	var cpu float64
 	if err != nil {
-		ctx.Logger.Error("failed to get cpu percent usage", "err", err)
+		ctx.Client().Logger.Error("failed to get cpu percent usage", "err", err)
 	} else {
 		for _, core := range prc {
 			cpu+=float64(core)
@@ -58,7 +60,7 @@ func BotStatsRun(ctx *util.CommandContext, cmdLen int) error {
 			discord.NewTextDisplay("**Counts**\n"+counts),
 			discord.NewTextDisplay("**Stats**"+usage),
 			discord.NewSmallSeparator(),
-			discord.NewTextDisplayf("-# Version: %s", ctx.Orb.Version),
+			discord.NewTextDisplayf("-# Version: %s", o.Version),
 		)).
 		AddFlags(discord.MessageFlagIsComponentsV2).
 		Build())
