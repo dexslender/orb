@@ -16,8 +16,7 @@ var gdCmd = discord.SlashCommandCreate{
 }
 
 func runGD(ctx *handler.CommandEvent) error {
-	subcmd := ctx.SlashCommandInteractionData().SubCommandName
-	switch *subcmd {
+	switch ctx.Vars["sub"] {
 	case "get-user":
 		return gd.GetUserRun(ctx)
 	case "get-daily":

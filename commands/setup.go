@@ -16,11 +16,11 @@ var setupCmd = discord.SlashCommandCreate{
 	Options: []discord.ApplicationCommandOption{setup.TicketsCommand},
 }
 
-func runSetup(cctx *handler.CommandEvent) error {
-	switch *cctx.SlashCommandInteractionData().SubCommandName {
+func runSetup(ctx *handler.CommandEvent) error {
+	switch ctx.Vars["sub"] {
 	case "tickets":
-		return setup.RunTickets(cctx)
+		return setup.RunTickets(ctx)
 	default:
-		return errors.New("unknown subcommand: " + *cctx.SlashCommandInteractionData().SubCommandName)
+		return errors.New("unknown subcommand: " + ctx.Vars["sub"])
 	}
 }

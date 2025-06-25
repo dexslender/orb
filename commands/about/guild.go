@@ -44,7 +44,7 @@ func GuildRun(ctx *handler.CommandEvent) error {
 	
 	components := discord.NewContainer(
 		discord.NewSection(discord.NewTextDisplayf(
-			"**%s**\n%s",
+			"## **%s**\n%s",
 			guild.Name, basic_info,
 		)).WithAccessory(discord.NewThumbnail(*guild.IconURL())),
 		discord.NewSmallSeparator(),
