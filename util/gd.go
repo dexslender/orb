@@ -87,7 +87,7 @@ func structToURLValues(item any) url.Values {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
-	for i := 0; i < v.NumField(); i++ {
+	for i := range v.NumField() {
 		tag := v.Field(i).Tag.Get("query")
 		field := reflectValue.Field(i).String()
 		if tag != "" && tag != "-" {

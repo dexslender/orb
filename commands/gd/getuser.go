@@ -37,11 +37,15 @@ func GetUserRun(ctx* handler.CommandEvent) error {
 	if user := util.DecodeGDData[util.PartialUser](string(data)); user != nil {
 		fuser := pp.Sprint(user) 
 		return ctx.CreateMessage(discord.NewMessageCreateBuilder().
-			SetContentf("```ansi\n%s```", fuser).
+			SetIsComponentsV2(true).
+			AddComponents(discord.NewTextDisplayf("```ansi\n%s```", fuser)).
 		Build())
 	}
 	return ctx.CreateMessage(discord.NewMessageCreateBuilder().
-		SetContent("```go\nNot found```").
+		SetIsComponentsV2(true).
+		AddComponents(discord.NewContainer(
+			discord.NewTextDisplay(":no_entry_sign: _Not Found_"),
+		)).
 	Build())
 }
 // xd
