@@ -1,31 +1,35 @@
 package commands
 
 import (
-	"errors"
-
-	"github.com/dexslender/orb/util"
+	"github.com/dexslender/orb/commands/about"
+	"github.com/dexslender/orb/orb"
+	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/handler"
+	// "github.com/disgoorg/disgo/handler/middleware"
 )
 
-var Commands = []util.Command{
-	new(Ping),
-	new(Purge),
-	new(Setup),
-	new(GD),
-	new(About),
+var List = []discord.ApplicationCommandCreate{
+	ping,
+	purge,
+	setupCmd,
+	gdCmd,
+	aboutCmd,
 }
 
-// Default values
-type base struct { util.Command }
+func Setup(o *orb.Orb, router handler.Router) {
+	// router.Use(middleware.Logger)
+	router.Command("/gd/{sub}", runGD)
+	router.Command("/setup/{sub}", runSetup)
 
-func (c *base) Run(*util.CommandContext) error { return errors.New("missing run function :(") }
+	router.Group(func(r handler.Router) {
+		r.Command("/purge", runPurge)
+		r.Command("/ping", runPing)
+	})
 
-func (c *base) Error(cctx *util.CommandContext, err error) {
-	command := cctx.Data.CommandName()
-	if sub := cctx.SlashCommandInteractionData().SubCommandName; sub != nil {
-		command+="/"+*sub
-	}
-	cctx.Logger.Error("command returned error",
-		"command", command,
-		"error", err,
-	)
+	router.Group(func(r handler.Router) {
+		r.Command("/about/{sub}", runAbout(o))
+		r.ButtonComponent("/about/guild/{guildId}", about.UpdateWithGuildStats)
+	})
+
+	router.ButtonComponent("/ping/refresh", runPingRefresh)
 }

@@ -4,28 +4,23 @@ import (
 	"errors"
 
 	"github.com/dexslender/orb/commands/setup"
-	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/handler"
 	"github.com/disgoorg/omit"
 )
 
-type Setup struct {
-	base
-	discord.SlashCommandCreate
+var setupCmd = discord.SlashCommandCreate{
+	Name: "setup",
+	Description: "just setup/configure bot features",
+	DefaultMemberPermissions: omit.NewPtr(discord.PermissionAdministrator),
+	Options: []discord.ApplicationCommandOption{setup.TicketsCommand},
 }
 
-func (c *Setup) Init(add util.InteractionRegister) {
-	c.Name = "setup"
-	c.Description = "just setup/configure bot features"
-	c.DefaultMemberPermissions = omit.NewPtr(discord.PermissionAdministrator)
-	c.Options = []discord.ApplicationCommandOption{setup.TicketsCommand}
-}
-
-func (c *Setup) Run(cctx *util.CommandContext) error {
-	switch *cctx.SlashCommandInteractionData().SubCommandName {
+func runSetup(ctx *handler.CommandEvent) error {
+	switch ctx.Vars["sub"] {
 	case "tickets":
-		return setup.RunTickets(cctx)
+		return setup.RunTickets(ctx)
 	default:
-		return errors.New("unknown subcommand: " + *cctx.SlashCommandInteractionData().SubCommandName)
+		return errors.New("unknown subcommand: " + ctx.Vars["sub"])
 	}
 }

@@ -5,59 +5,48 @@ import (
 
 	"github.com/dexslender/orb/util"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/handler"
 )
 
-type Ping struct { base; discord.SlashCommandCreate }
-
-func (c *Ping) Init(add util.InteractionRegister) {
-	c.Name = "ping"
-	c.Description = "just returns pong"
-	// TODO: Make hidden by default and fix problems (ephemeral update message only once time)
-	// c.Options = []discord.ApplicationCommandOption{ util.HiddenOpt }
-
-	add.Component("refresh-ping", refresh)
+var ping = discord.SlashCommandCreate{
+	Name: "ping",
+	Description: "just returns pong",
 }
 
-func (c *Ping) Run(cctx *util.CommandContext) error {
-	s := time.Now()
-	err := cctx.DeferCreateMessage(false)
-	if err != nil {
-		return err
-	}
-	rest := time.Since(s).Round(time.Millisecond)
-	GW := cctx.Client().Gateway.
-		Latency().Round(time.Millisecond)
+func runPing(e *handler.CommandEvent) error {
+	a := time.Now()
+	err := e.DeferCreateMessage(false)
+	if err != nil { return err }
+	rest := time.Since(a).Round(time.Millisecond)
+	gate := e.Client().Gateway.Latency().Round(time.Millisecond)
 
-	refresh := discord.NewSecondaryButton("Refresh", "refresh-ping")
+	_, err = e.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+		SetComponents(buildContainer(rest, gate)).
+		AddFlags(discord.MessageFlagIsComponentsV2).
+	Build())
+	return err
+}
 
-	_, err = cctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-	SetContentf("```yaml\n%s```", util.FormatSpacing(
+func runPingRefresh(data discord.ButtonInteractionData, e *handler.ComponentEvent) error {
+	a := time.Now()
+	err := e.DeferUpdateMessage()
+	if err != nil { return err }
+	rest := time.Since(a).Round(time.Millisecond)
+	gate := e.Client().Gateway.Latency().Round(time.Millisecond)
+	_, err = e.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+		SetComponents(buildContainer(rest, gate)).
+	Build())
+	return err
+}
+
+func buildContainer(rest, gate time.Duration) discord.ContainerComponent {
+	return discord.NewContainer(
+		discord.NewTextDisplayf("```yaml\n%s```", util.FormatSpacing(
 			"Rest", rest,
-			"Gateway", GW,
-		)).
-		AddActionRow(refresh).
-		Build(),
+			"Gateway", gate,
+		)),
+		discord.NewActionRow(
+			discord.NewSecondaryButton("Refresh", "/ping/refresh"),
+		),
 	)
-	return err
-}
-
-func refresh(cctx *util.ComponentContext) error {
-	s := time.Now()
-	err := cctx.DeferUpdateMessage()
-	if err != nil {
-		return err
-	}
-	rest := time.Since(s).Round(time.Millisecond)
-	GW := cctx.Client().Gateway.Latency().Round(time.Millisecond)
-	_, err = cctx.Client().Rest.UpdateMessage(
-		cctx.Message.ChannelID,
-		cctx.Message.ID,
-		discord.NewMessageUpdateBuilder().
-			SetContentf("```yaml\n%s```", util.FormatSpacing(
-				"Rest", rest,
-				"Gateway", GW,
-			)).
-			Build(),
-	)
-	return err
 }

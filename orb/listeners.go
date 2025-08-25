@@ -8,8 +8,5 @@ func listeners(o *Orb) *events.ListenerAdapter {
 			o.Log.Info("logged in", "tag", client.User.Tag())
 			go o.StartActivityUpdater(*client.Client())
 		},
-		OnInteraction: func(event *events.InteractionCreate) {
-			o.OnInteraction(event)
-		},
 	}
 }
