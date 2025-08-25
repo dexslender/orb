@@ -39,7 +39,7 @@ func main() {
 	commands.Setup(bot, router)
 	if config.Bot.SetupCommands {
 		handler.SyncCommands(bot.Client, commands.List, []snowflake.ID{})
-	}	
+	}
 	bot.Setup()
 	bot.AddEventListeners(router)
 

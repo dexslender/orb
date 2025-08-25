@@ -3,7 +3,7 @@ package gd
 import (
 	"io"
 
-	"github.com/dexslender/orb/util"
+	"github.com/dexslender/orb/util/gd"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 )
@@ -23,10 +23,10 @@ var GetDailyCommand = discord.ApplicationCommandOptionSubCommand{
 func GetDailyRun(ctx *handler.CommandEvent) error {
 	//weekly := ctx.SlashCommandInteractionData().Bool("weekly")
 	
-	res, err := util.GDClient.Request(
-		util.Daily,
-		util.DailyParams{
-			Secret: util.COMMON_KEY,
+	res, err := gd.GDClient.Request(
+		gd.Daily,
+		gd.DailyParams{
+			Secret: gd.COMMON_KEY,
 			Weekly: 1,
 		},
 	)

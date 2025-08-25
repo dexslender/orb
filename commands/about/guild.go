@@ -1,14 +1,10 @@
 package about
 
 import (
-	"context"
 	"fmt"
-	"time"
 
 	"github.com/dexslender/orb/util"
-	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/handler"
 )
 
@@ -39,7 +35,7 @@ func GuildRun(ctx *handler.CommandEvent) error {
 		desc,
 	)
 
-	btnStats := discord.NewSecondaryButton("Stats", "guild-stats")
+	btnStats := discord.NewSecondaryButton("Stats", fmt.Sprintf("/about/guild/%d", guild.ID))
 	btnFeats := discord.NewSecondaryButton("Features", "guild-features")
 	
 	components := discord.NewContainer(
@@ -55,42 +51,53 @@ func GuildRun(ctx *handler.CommandEvent) error {
 		AddComponents(components).
 		SetIsComponentsV2(true).
 	Build())
-	if err != nil { return err }
+	return err
 
-	msg, err := ctx.GetInteractionResponse();
-	if err != nil { return err }
+	// msg, err := ctx.GetInteractionResponse();
+	// if err != nil { return err }
 
-	action, clos := bot.NewEventCollector(
-		ctx.Client(),
-		func(e *events.ComponentInteractionCreate) bool {
-			return e.Message.ID == msg.ID && e.User().ID == ctx.User().ID 
-		},
-	)
-	defer clos()
-	Tctx, Tclos := context.WithTimeout(context.Background(), time.Minute*10)
-	defer Tclos()
-	select {
-	case button := <-action:
-		err := button.DeferUpdateMessage()
-		if err != nil { return err }
-		switch button.Data.CustomID() {
-		case "guild-stats":
-			return UpdateWithGuildStats(button, guild)
-		default:
-			return button.DeferUpdateMessage()
-		}
-	case <-Tctx.Done():
-		btnStats.Disabled = true
-		btnFeats.Disabled = true
-		_, err := ctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-			SetComponents(components).
-		Build())
-		return err
-	}
+	// action, clos := bot.NewEventCollector(
+	// 	ctx.Client(),
+	// 	func(e *events.ComponentInteractionCreate) bool {
+	// 		return e.Message.ID == msg.ID && e.User().ID == ctx.User().ID 
+	// 	},
+	// )
+	// defer clos()
+	// Tctx, Tclos := context.WithTimeout(context.Background(), time.Minute*10)
+	// defer Tclos()
+	// select {
+	// case button := <-action:
+	// 	err := button.DeferUpdateMessage()
+	// 	if err != nil { return err }
+	// 	switch button.Data.CustomID() {
+	// 	case "guild-stats":
+	// 		return UpdateWithGuildStats(button, guild)
+	// 	default:
+	// 		return button.DeferUpdateMessage()
+	// 	}
+	// case <-Tctx.Done():
+	// 	btnStats.Disabled = true
+	// 	btnFeats.Disabled = true
+	// 	_, err := ctx.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+	// 		SetComponents(components).
+	// 	Build())
+	// 	return err
+	// }
 }
 
-func UpdateWithGuildStats(button *events.ComponentInteractionCreate, guild discord.Guild) error {
-	return nil
+func UpdateWithGuildStats(data discord.ButtonInteractionData, e *handler.ComponentEvent) error {
+	guild, ok := e.Guild()
+	if !ok { return e.DeferUpdateMessage() }
+
+	err := e.DeferCreateMessage(true)
+	if err != nil { return err }
+
+	
+
+	return e.CreateMessage(discord.NewMessageCreateBuilder().
+		SetIsComponentsV2(true).
+		AddComponents(discord.NewTextDisplay(*guild.Banner)).
+	Build())
 }
 
 func UpdateWithGuildFeatures() error {
